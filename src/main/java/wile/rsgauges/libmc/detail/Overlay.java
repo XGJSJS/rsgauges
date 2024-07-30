@@ -9,9 +9,9 @@
 package wile.rsgauges.libmc.detail;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -95,7 +95,7 @@ public class Overlay
       if(text()==EMPTY_TEXT) return;
       String txt = text().getString();
       if(txt.isEmpty()) return;
-      PoseStack mxs = event.getPoseStack();
+      GuiGraphics mxs = event.getGuiGraphics();
       final Window win = mc.getWindow();
       final Font fr = mc.font;
       final boolean was_unicode = fr.isBidirectional();
@@ -103,12 +103,12 @@ public class Overlay
       final int cy = (int)(win.getGuiScaledHeight() * overlay_y_);
       final int w = fr.width(txt);
       final int h = fr.lineHeight;
-      fillGradient(mxs, cx-(w/2)-3, cy-2, cx+(w/2)+2, cy+h+2, 0xaa333333, 0xaa444444);
-      hLine(mxs, cx-(w/2)-3, cx+(w/2)+2, cy-2, 0xaa333333);
-      hLine(mxs, cx-(w/2)-3, cx+(w/2)+2, cy+h+2, 0xaa333333);
-      vLine(mxs, cx-(w/2)-3, cy-2, cy+h+2, 0xaa333333);
-      vLine(mxs, cx+(w/2)+2, cy-2, cy+h+2, 0xaa333333);
-      drawCenteredString(mxs, fr, text(), cx , cy+1, 0x00ffaa00);
+      mxs.fillGradient(cx-(w/2)-3, cy-2, cx+(w/2)+2, cy+h+2, 0xaa333333, 0xaa444444);
+      mxs.hLine(cx-(w/2)-3, cx+(w/2)+2, cy-2, 0xaa333333);
+      mxs.hLine(cx-(w/2)-3, cx+(w/2)+2, cy+h+2, 0xaa333333);
+      mxs.vLine(cx-(w/2)-3, cy-2, cy+h+2, 0xaa333333);
+      mxs.vLine(cx+(w/2)+2, cy-2, cy+h+2, 0xaa333333);
+      mxs.drawCenteredString(fr, text(), cx , cy+1, 0x00ffaa00);
     }
   }
 

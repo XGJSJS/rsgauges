@@ -8,8 +8,11 @@
  */
 package wile.rsgauges;
 
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -25,63 +28,65 @@ import wile.rsgauges.libmc.detail.OptionalRecipeCondition;
 import wile.rsgauges.libmc.detail.PlayerBlockInteraction;
 import wile.rsgauges.libmc.detail.Registries;
 
-
 @Mod("rsgauges")
-public class ModRsGauges
-{
+public class ModRsGauges {
   public static final String MODID = "rsgauges";
   public static final String MODNAME = "Gauges and Switches";
-  public static final int VERSION_DATAFIXER = 0;
   private static final Logger LOGGER = LogManager.getLogger();
 
   // -------------------------------------------------------------------------------------------------------------------
 
-  public ModRsGauges()
-  {
+  public ModRsGauges() {
+    IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
     Auxiliaries.init(MODID, LOGGER, ModConfig::getServerConfig);
     Auxiliaries.logGitVersion(MODNAME);
     Registries.init(MODID, "industrial_small_lever");
-    ModContent.init(MODID);
+    ModContent.init(MODID, eventBus);
     OptionalRecipeCondition.init(MODID, LOGGER);
     ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, ModConfig.COMMON_CONFIG_SPEC);
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(ForgeEvents::onSetup);
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(ForgeEvents::onClientSetup);
+    eventBus.addListener(ForgeEvents::onSetup);
+    eventBus.addListener(ForgeEvents::onClientSetup);
     MinecraftForge.EVENT_BUS.register(this);
-    PlayerBlockInteraction.init(MODID, LOGGER);
+    PlayerBlockInteraction.init();
+    eventBus.addListener(this::addCreativeTab);
+  }
+
+  private void addCreativeTab(BuildCreativeModeTabContentsEvent event) {
+    if (event.getTab() == Registries.TAB.get()) {
+      for (var i : Registries.TAB_ITEMS) {
+        event.accept(i, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+      }
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Events
   // -------------------------------------------------------------------------------------------------------------------
 
-  @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
-  public static final class ForgeEvents
-  {
-    public static void onSetup(final FMLCommonSetupEvent event)
-    {
+  @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+  public static final class ForgeEvents {
+    public static void onSetup(final FMLCommonSetupEvent event) {
       CraftingHelper.register(OptionalRecipeCondition.Serializer.INSTANCE);
       wile.rsgauges.libmc.detail.Networking.init(MODID);
       BlockCategories.update();
     }
 
-    public static void onClientSetup(final FMLClientSetupEvent event)
-    {
+    public static void onClientSetup(final FMLClientSetupEvent event) {
       wile.rsgauges.libmc.detail.Overlay.register();
-      ModContent.processContentClientSide(event);
     }
 
     @SubscribeEvent
-    public static void onConfigLoad(final ModConfigEvent.Loading event)
-    { ModConfig.apply(); }
+    public static void onConfigLoad(final ModConfigEvent.Loading event) {
+      ModConfig.apply();
+    }
 
     @SubscribeEvent
-    public static void onConfigReload(final ModConfigEvent.Reloading event)
-    {
+    public static void onConfigReload(final ModConfigEvent.Reloading event) {
       try {
         Auxiliaries.logger().info("Config file changed {}", event.getConfig().getFileName());
         ModConfig.apply();
-      } catch(Throwable e) {
-        Auxiliaries.logger().error("Failed to load changed config: " + e.getMessage());
+      } catch (Throwable e) {
+          Auxiliaries.logger().error("Failed to load changed config: {}", e.getMessage());
       }
     }
   }

@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
@@ -46,7 +47,7 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new IntervalTimerSwitchTileEntity(pos, state); }
 
   @Override
@@ -228,7 +229,7 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
       if(p != p_) {
         setpower((inverted() ? (15-p_) : (p_)));
         BlockState state = getLevel().getBlockState(getBlockPos());
-        if((state==null) || (!(state.getBlock() instanceof AutoSwitchBlock)) || (!state.getValue(POWERED))) {
+        if(!(state.getBlock() instanceof AutoSwitchBlock) || !state.getValue(POWERED)) {
           update_timer_ = 200 + ((int)(Math.random() * 10));
           setpower(inverted() ? (15) : (0));
         }

@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
@@ -40,7 +41,7 @@ public class LinkSenderSwitchBlock extends SwitchBlock
   { return 0; }
 
   @Override
-  public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
+  public void setPlacedBy(@NotNull Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
   {
     final SwitchTileEntity te = getTe(world, pos);
     if(te != null) te.reset(world);

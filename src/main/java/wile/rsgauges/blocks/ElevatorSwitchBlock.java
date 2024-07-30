@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
@@ -45,7 +46,7 @@ public class ElevatorSwitchBlock extends PulseSwitchBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     BlockState state = super.getStateForPlacement(context);
     if(state==null) return null;

@@ -26,67 +26,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-public class BlockCategories
-{
+public class BlockCategories {
   private static final String MODID = ModRsGauges.MODID;
 
-  public final static void update()
-  {}
+  public static void update() {}
 
-  public final static Matcher getMatcher(String name)
-  { return matchers_.getOrDefault(name, filter_none); }
+  public static Matcher getMatcher(String name) {
+    return matchers_.getOrDefault(name, filter_none);
+  }
 
-  public final static List<String> getMatcherNames()
-  { return matcher_names_; }
+  public static List<String> getMatcherNames() {
+    return matcher_names_;
+  }
 
-  public interface Matcher { boolean match(Level world, BlockPos pos); }
+  @FunctionalInterface
+  public interface Matcher {
+    boolean match(Level world, BlockPos pos);
+  }
+
   private static final Matcher filter_none = (final Level w, final BlockPos p) -> false;
   private static final Map<String, Matcher> matchers_;
   private static final List<String> matcher_names_;
 
-  static
-  {
+  static {
     // --------------------------------------------------------------------------------
-    matchers_ = new HashMap<String, Matcher>();
+    matchers_ = new HashMap<>();
 
     matchers_.put("any", (final Level w, final BlockPos p) -> {
       BlockState st = w.getBlockState(p);
       return !st.isAir();
     });
 
-    matchers_.put("solid", (final Level w, final BlockPos p) -> {
-      return w.getBlockState(p).getMaterial().isSolid();
-    });
+    matchers_.put("solid", (final Level w, final BlockPos p) -> w.getBlockState(p).isSolid());
 
-    matchers_.put("liquid", (final Level w, final BlockPos p) -> {
-      return (w.getBlockState(p).getMaterial().isLiquid()) || (!w.getFluidState(p).isEmpty());
-    });
+    matchers_.put("liquid", (final Level w, final BlockPos p) -> (w.getBlockState(p).liquid()) || (!w.getFluidState(p).isEmpty()));
 
-    matchers_.put("air", (final Level w, final BlockPos p) -> {
-      return w.getBlockState(p).isAir();
-    });
+    matchers_.put("air", (final Level w, final BlockPos p) -> w.getBlockState(p).isAir());
 
     matchers_.put("plant", (final Level w, final BlockPos p) -> {
       Block b=w.getBlockState(p).getBlock();
       return (b instanceof GrowingPlantBlock) || (b instanceof IPlantable) || Auxiliaries.isInBlockTag(b, new ResourceLocation(MODID, "plants"));
     });
 
-    matchers_.put("material_wood", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "wooden"));
-    });
+    matchers_.put("material_wood", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "wooden")));
 
-    matchers_.put("material_stone", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "stone_like"));
-    });
+    matchers_.put("material_stone", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "stone_like")));
 
-    matchers_.put("material_glass", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "glass_like"));
-    });
+    matchers_.put("material_glass", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "glass_like")));
 
-    matchers_.put("material_clay", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "clay_like"));
-    });
+    matchers_.put("material_clay", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "clay_like")));
 
     matchers_.put("material_water", (final Level w, final BlockPos p) -> {
       BlockState st = w.getBlockState(p);
@@ -96,13 +84,9 @@ public class BlockCategories
       return (st.getFluidState().getType() == Fluids.WATER) || (st.getFluidState().getType() == Fluids.FLOWING_WATER);
     });
 
-    matchers_.put("ore", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "ores"));
-    });
+    matchers_.put("ore", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "ores")));
 
-    matchers_.put("woodlog", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "logs"));
-    });
+    matchers_.put("woodlog", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "logs")));
 
     matchers_.put("crop", (final Level w, final BlockPos p) -> {
       Block b = w.getBlockState(p).getBlock();
@@ -115,25 +99,15 @@ public class BlockCategories
       return ((b instanceof CropBlock) && ((CropBlock)b).isMaxAge(s)) || (b== Blocks.MELON) || (b==Blocks.PUMPKIN);
     });
 
-    matchers_.put("sapling", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "saplings"));
-    });
+    matchers_.put("sapling", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "saplings")));
 
-    matchers_.put("soil", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "soils"));
-    });
+    matchers_.put("soil", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "soils")));
 
-    matchers_.put("fertile", (final Level w, final BlockPos p) -> {
-      return w.getBlockState(p).getBlock().isFertile(w.getBlockState(p), w, p);
-    });
+    matchers_.put("fertile", (final Level w, final BlockPos p) -> w.getBlockState(p).getBlock().isFertile(w.getBlockState(p), w, p));
 
-    matchers_.put("planks", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "planks"));
-    });
+    matchers_.put("planks", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "planks")));
 
-    matchers_.put("slab", (final Level w, final BlockPos p) -> {
-      return Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "slabs"));
-    });
+    matchers_.put("slab", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p).getBlock(), new ResourceLocation(MODID, "slabs")));
 
     // --------------------------------------------------------------------------------
 
@@ -157,7 +131,9 @@ public class BlockCategories
     matcher_names_.add("fertile");
     matcher_names_.add("planks");
     matcher_names_.add("slab");
-    matchers_.forEach((k,v)->{ if(!matcher_names_.contains(k)) matcher_names_.add(k);});
+    matchers_.forEach((k, v) -> {
+      if (!matcher_names_.contains(k))
+        matcher_names_.add(k);
+    });
   }
-
 }

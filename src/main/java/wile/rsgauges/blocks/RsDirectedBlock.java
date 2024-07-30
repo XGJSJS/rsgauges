@@ -25,6 +25,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -106,7 +107,7 @@ public abstract class RsDirectedBlock extends RsBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     if(!isValidPositionOnSide(context.getLevel(), context.getClickedPos(), context.getClickedFace())) return null;
     final BlockState state = super.getStateForPlacement(context);
@@ -129,7 +130,7 @@ public abstract class RsDirectedBlock extends RsBlock
   @Override
   public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos currentPos, BlockPos facingPos)
   {
-    if(isCube() || ((!world.isEmptyBlock(facingPos)) && (!facingState.getMaterial().isLiquid()))) return state;
+    if(isCube() || ((!world.isEmptyBlock(facingPos)) && (!facingState.liquid()))) return state;
     Direction blockfacing = state.getValue(FACING);
     if((!isWallMount()) && (isLateral()) && (facing==Direction.DOWN)) return Blocks.AIR.defaultBlockState(); // floor mount, e.g. contact mats
     if(isWallMount() && (!isLateral()) && (facing==state.getValue(FACING).getOpposite())) return Blocks.AIR.defaultBlockState(); // wallmount are placed facing the player
@@ -179,9 +180,7 @@ public abstract class RsDirectedBlock extends RsBlock
     if((!isLateral()) && (!pos.relative(state.getValue(FACING).getOpposite()).equals(neighborPos))) return false;
     if(!pos.relative(state.getValue(FACING).getOpposite()).equals(neighborPos)) return false;
     final BlockState neighborState = world.getBlockState(neighborPos);
-    if(neighborState == null) return false;
-    if((world.isEmptyBlock(neighborPos)) || (neighborState.getMaterial().isLiquid())) return false;
-    return true;
+      return (!world.isEmptyBlock(neighborPos)) && (!neighborState.liquid());
   }
 
   /**

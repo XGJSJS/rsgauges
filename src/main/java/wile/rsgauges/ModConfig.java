@@ -25,7 +25,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 public class ModConfig
 {
   public static final CommonConfig COMMON;
@@ -169,10 +168,10 @@ public class ModConfig
   // Optout checks
   //--------------------------------------------------------------------------------------------------------------------
 
-  public static final boolean isOptedOut(final @Nullable Block block)
+  public static boolean isOptedOut(final @Nullable Block block)
   { return (block==null) || isOptedOut(block.asItem()); }
 
-  public static final boolean isOptedOut(final @Nullable Item item)
+  public static boolean isOptedOut(final @Nullable Item item)
   {
     if (item == null) return true;
     ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
@@ -193,7 +192,6 @@ public class ModConfig
   private static HashSet<String> optouts_ = new HashSet<>();
   private static boolean with_experimental_features_ = false;
   private static boolean with_config_logging_ = false;
-  public static boolean status_overlay_disabled = false;
   public static boolean without_switch_linking = false;
   public static boolean without_gauge_weak_power_measurement = false;
   public static boolean without_pulsetime_config = false;
@@ -205,19 +203,18 @@ public class ModConfig
   public static int autoswitch_volumetric_update_interval = 2;
   public static int gauge_update_interval = 2;
   public static int config_left_click_timeout = 600;
-  public static double switch_status_overlay_y = 0.75;
-  public static final Set<ResourceLocation> accepted_wrenches = new HashSet<>(Arrays.asList(new ResourceLocation("minecraft","redsdtone_torch")));
+  public static final Set<ResourceLocation> accepted_wrenches = new HashSet<>(List.of(new ResourceLocation("minecraft", "redsdtone_torch")));
 
-  public static final CompoundTag getServerConfig()
+  public static CompoundTag getServerConfig()
   { return server_config_; }
 
-  private static final void updateOptouts()
+  private static void updateOptouts()
   {
     final ArrayList<String> includes = new ArrayList<>();
     final ArrayList<String> excludes = new ArrayList<>();
     {
       String inc = COMMON.pattern_includes.get().toLowerCase().replaceAll(Auxiliaries.modid()+":", "").replaceAll("[^*_,a-z0-9]", "");
-      if(COMMON.pattern_includes.get() != inc) COMMON.pattern_includes.set(inc);
+      if (!Objects.equals(COMMON.pattern_includes.get(), inc)) COMMON.pattern_includes.set(inc);
       String[] incl = inc.split(",");
       for(int i=0; i< incl.length; ++i) {
         incl[i] = incl[i].replaceAll("[*]", ".*?");
@@ -268,7 +265,7 @@ public class ModConfig
     OptionalRecipeCondition.on_config(withExperimental(), withoutRecipes(), ModConfig::isOptedOut, ModConfig::isOptedOut);
   }
 
-  public static final void apply()
+  public static void apply()
   {
     if((COMMON == null) || (!COMMON_CONFIG_SPEC.isLoaded())) return;
     with_config_logging_ = COMMON.with_config_logging.get();
@@ -298,12 +295,12 @@ public class ModConfig
     log("Accepted wrenches: " + accepted_wrenches.stream().map(ResourceLocation::toString).collect(Collectors.joining(",")));
   }
 
-  public static final void log(String config_message)
+  public static void log(String config_message)
   {
     if(!with_config_logging_) return;
     Auxiliaries.logInfo(config_message);
   }
 
-  public static final boolean isWrench(final ItemStack stack)
+  public static boolean isWrench(final ItemStack stack)
   { return accepted_wrenches.contains(ForgeRegistries.ITEMS.getKey(stack.getItem())); }
 }

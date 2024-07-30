@@ -13,17 +13,12 @@
 package wile.rsgauges;
 
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.ObjectHolder;
 import wile.rsgauges.blocks.*;
 import wile.rsgauges.detail.ModResources;
@@ -31,60 +26,54 @@ import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Registries;
 
-
-public class ModContent
-{
-  private static class detail
-  {
+public class ModContent {
+  private static class detail {
     public static String MODID = "";
 
     //public static Boolean disallowSpawn(BlockState state, BlockGetter reader, BlockPos pos, EntityType<?> entity) { return false; }
 
-    public static final BlockBehaviour.Properties gauge_metallic_block_properties()
-    { return BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).noCollission().isValidSpawn((s,w,p,e)->false); }
+    public static BlockBehaviour.Properties gauge_metallic_block_properties() {
+      return BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).noCollission().isValidSpawn((s,w,p,e)->false);
+    }
 
-    public static final BlockBehaviour.Properties gauge_glass_block_properties()
-    { return (BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).noOcclusion().isValidSpawn((s,w,p,e)->false)); }
+    public static BlockBehaviour.Properties gauge_glass_block_properties() {
+      return (BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).noOcclusion().isValidSpawn((s,w,p,e)->false));
+    }
 
-    public static final BlockBehaviour.Properties indicator_metallic_block_properties()
-    { return BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).lightLevel((state)->3).noOcclusion().isValidSpawn((s,w,p,e)->false); }
+    public static BlockBehaviour.Properties indicator_metallic_block_properties() {
+      return BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).lightLevel((state)->3).noOcclusion().isValidSpawn((s,w,p,e)->false);
+    }
 
-    public static final BlockBehaviour.Properties indicator_glass_block_properties()
-    { return BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).lightLevel((state)->3).noOcclusion().isValidSpawn((s,w,p,e)->false); }
+    public static BlockBehaviour.Properties alarm_lamp_block_properties() {
+      return BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).noOcclusion().lightLevel((state)->state.getValue(IndicatorBlock.POWERED)?12:2).isValidSpawn((s,w,p,e)->false);
+    }
 
-    public static final BlockBehaviour.Properties alarm_lamp_block_properties()
-    { return BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).noOcclusion().lightLevel((state)->state.getValue(IndicatorBlock.POWERED)?12:2).isValidSpawn((s,w,p,e)->false); }
+    public static BlockBehaviour.Properties colored_sensitive_glass_block_properties() {
+      return (BlockBehaviour.Properties.of().strength(0.35f, 15f).sound(SoundType.METAL).noOcclusion().isValidSpawn((s,w,p,e)->false));
+    }
 
-    public static final BlockBehaviour.Properties colored_sensitive_glass_block_properties()
-    { return (BlockBehaviour.Properties.of(Material.BUILDABLE_GLASS, MaterialColor.METAL).strength(0.35f, 15f).sound(SoundType.METAL).noOcclusion().isValidSpawn((s,w,p,e)->false)); }
+    public static BlockBehaviour.Properties light_emitting_sensitive_glass_block_properties() {
+      return BlockBehaviour.Properties.of().strength(0.35f, 15f).sound(SoundType.METAL).noOcclusion().emissiveRendering((s,w,p)->true).lightLevel((state)->state.getValue(SensitiveGlassBlock.POWERED)?15:0).isValidSpawn((s,w,p,e)->false);
+    }
 
-    public static final BlockBehaviour.Properties light_emitting_sensitive_glass_block_properties()
-    { return BlockBehaviour.Properties.of(Material.BUILDABLE_GLASS, MaterialColor.METAL).strength(0.35f, 15f).sound(SoundType.METAL).noOcclusion().emissiveRendering((s,w,p)->true).lightLevel((state)->state.getValue(SensitiveGlassBlock.POWERED)?15:0).isValidSpawn((s,w,p,e)->false); }
+    public static BlockBehaviour.Properties switch_metallic_block_properties() {
+      return gauge_metallic_block_properties();
+    }
 
-    public static final BlockBehaviour.Properties switch_metallic_block_properties()
-    { return gauge_metallic_block_properties(); }
-
-    public static final BlockBehaviour.Properties switch_glass_block_properties()
-    { return gauge_glass_block_properties(); }
-
-    public static final BlockBehaviour.Properties switch_metallic_faint_light_block_properties()
-    { return BlockBehaviour.Properties.of(Material.METAL, MaterialColor.METAL).strength(0.5f, 15f).sound(SoundType.METAL).lightLevel((state)->5); }
-
-    private static Item.Properties default_item_properties()
-    { return (new Item.Properties()).tab(Registries.getCreativeModeTab()); }
+    public static BlockBehaviour.Properties switch_metallic_faint_light_block_properties() {
+      return BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).lightLevel((state)->5);
+    }
   }
 
-  public static void init(String modid)
-  {
+  public static void init(String modid, IEventBus eventBus) {
     detail.MODID = modid;
     initTags();
     initBlocks();
     initItems();
-    Registries.registerAll();
+    Registries.registerAll(eventBus);
   }
 
-  private static void initTags()
-  {
+  private static void initTags() {
     Registries.addOptionalBlockTag("clay_like", "minecraft:clay");
     Registries.addOptionalBlockTag("glass_like", "minecraft:glass");
     Registries.addOptionalBlockTag("logs", "minecraft:oak_log");
@@ -99,8 +88,7 @@ public class ModContent
     Registries.addOptionalBlockTag("wooden", "minecraft:oak_log");
   }
 
-  public static void initBlocks()
-  {
+  public static void initBlocks() {
     // Contact lever switch
     Registries.addBlock("industrial_small_lever", ()->new BistableSwitchBlock(
       SwitchBlock.RSBLOCK_CONFIG_CUTOUT|
@@ -1195,25 +1183,13 @@ public class ModContent
     Registries.addBlockEntityType("te_doorsensor_switch", DoorSensorSwitchBlock.DoorSensorSwitchTileEntity::new, DoorSensorSwitchBlock.class);
   }
 
-  public static void initItems()
-  {
-    Registries.addItem("switchlink_pearl", ()->new SwitchLinkPearlItem(detail.default_item_properties()));
+  public static void initItems() {
+    Registries.addItem("switchlink_pearl", ( )-> new SwitchLinkPearlItem(new Item.Properties()));
   }
 
-  public static Block getBlock(String name)
-  { return Registries.getBlock(name); }
-
-  public static Item getItem(String name)
-  { return Registries.getItem(name); }
-
-  public static TagKey<Block> getBlockTagKey(String name)
-  { return Registries.getBlockTagKey(name); }
-
-  public static TagKey<Item> getItemTagKey(String name)
-  { return Registries.getItemTagKey(name); }
-
-  public static BlockEntityType<?> getBlockEntityTypeOfBlock(String block_name)
-  { return Registries.getBlockEntityTypeOfBlock(block_name); }
+  public static Block getBlock(String name) {
+    return Registries.getBlock(name);
+  }
 
   //--------------------------------------------------------------------------------------------------------------------
   // Tile entities bound exclusively to the blocks above
@@ -1241,13 +1217,4 @@ public class ModContent
   public static final BlockEntityType<DoorSensorSwitchBlock.DoorSensorSwitchTileEntity> TET_DOORSENSOR_SWITCH = null;
   @ObjectHolder(registryName = "item", value =  "rsgauges:switchlink_pearl")
   public static final SwitchLinkPearlItem SWITCH_LINK_PEARL = null;
-
-  //--------------------------------------------------------------------------------------------------------------------
-  // Initialisation events
-  //--------------------------------------------------------------------------------------------------------------------
-
-  @OnlyIn(Dist.CLIENT)
-  public static void processContentClientSide(final FMLClientSetupEvent event)
-  {}
-
 }

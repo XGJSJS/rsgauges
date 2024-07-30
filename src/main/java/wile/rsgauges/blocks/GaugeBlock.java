@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
@@ -40,7 +41,7 @@ public class GaugeBlock extends AbstractGaugeBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     final BlockState state = super.getStateForPlacement(context);
     return (state==null) ? null : state.setValue(POWER, 0);

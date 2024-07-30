@@ -109,22 +109,30 @@ public class SwitchLink
   { return (nbt==null) ? (new SwitchLink()) : (new SwitchLink(BlockPos.of(nbt.getLong("p")), nbt.getString("b"), nbt.getLong("t"))); }
 
   public static SwitchLink fromItemStack(ItemStack stack)
-  { return ((stack==null) || (stack.isEmpty()) || (stack.getItem()!=ModContent.SWITCH_LINK_PEARL)) ? (new SwitchLink()) : (fromNbt(stack.getTag())); }
+  {
+      if ((stack != null) && (!stack.isEmpty())) {
+          stack.getItem();
+      }
+      return new SwitchLink(); }
 
   public static SwitchLink fromTargetPosition(final Level world, final BlockPos pos)
   {
     if(pos==null) return new SwitchLink();
     final BlockState state = world.getBlockState(pos);
-    if((state==null) || (!(state.getBlock() instanceof ISwitchLinkable))) return new SwitchLink();
+    if(!(state.getBlock() instanceof ISwitchLinkable)) return new SwitchLink();
     if(!((ISwitchLinkable)state.getBlock()).switchLinkHasTargetSupport(world, pos)) return new SwitchLink();
     return new SwitchLink(pos, ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString(), 0);
   }
 
   public static SwitchLink fromPlayerActiveItem(Level world, Player player)
   {
-    if((player==null) || (world.isClientSide()) || (player.getInventory()==null) || (player.getInventory().getSelected()==null)) return new SwitchLink();
-    if(player.getInventory().getSelected().getItem()!=ModContent.SWITCH_LINK_PEARL) return null;
-    return SwitchLink.fromNbt(player.getInventory().getSelected().getTag());
+    if(player == null || world.isClientSide()) {
+        return new SwitchLink();
+    } else {
+        player.getInventory().getSelected();
+    }
+      player.getInventory().getSelected().getItem();
+      return null;
   }
 
   public CompoundTag toNbt()
@@ -168,8 +176,7 @@ public class SwitchLink
     if((!valid) || (world.isClientSide())) return RequestResult.INVALID_LINKDATA;
     if(isTooFar(source_pos) || ((!world.hasChunkAt(target_position)))) return RequestResult.TOO_FAR;
     final BlockState target_state = world.getBlockState(target_position);
-    if(target_state==null) return RequestResult.TOO_FAR;
-    final Block block = target_state.getBlock();
+      final Block block = target_state.getBlock();
     if((!(block instanceof final ISwitchLinkable target)) || (!ForgeRegistries.BLOCKS.getKey(block).toString().equals(block_name))) return RequestResult.TARGET_GONE;
     final int p = target.switchLinkOutputPower(world, target_position).orElse(0);
     this.world = world;
@@ -180,7 +187,6 @@ public class SwitchLink
     return target.switchLinkTrigger(this);
   }
 
-  @SuppressWarnings("deprecation")
   public RequestResult trigger(final Level world, final BlockPos source_pos, int analog_power, int digital_power, boolean state_changed)
   {
     final ISwitchLinkable target = target(world, source_pos);

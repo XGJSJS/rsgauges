@@ -24,6 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.Tags;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -31,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 
 public final class ColorUtils
 {
@@ -41,13 +41,13 @@ public final class ColorUtils
   public interface IBlockColorTintSupport extends BlockColor
   {
     default boolean hasColorTint() { return false; }
-    default int getColor(BlockState state, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos, int tintIndex) { return 0xffffffff; }
+    default int getColor(@NotNull BlockState state, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos, int tintIndex) { return 0xffffffff; }
   }
 
   public interface IItemColorTintSupport extends ItemColor
   {
     default boolean hasColorTint() { return false; }
-    default int getColor(ItemStack stack, int tintIndex) { return 0xffffffff; }
+    default int getColor(@NotNull ItemStack stack, int tintIndex) { return 0xffffffff; }
   }
 
   private static Supplier<List<Block>> blocks_supplier_ = Collections::emptyList;
@@ -60,7 +60,7 @@ public final class ColorUtils
   public static void registerBlockColourHandlers(final RegisterColorHandlersEvent.Block event)
   {
     if(!blocks_supplier_.get().isEmpty()) {
-      event.getBlockColors().register(
+      event.register(
         (state, world, pos, tintIndex) -> (((IBlockColorTintSupport)state.getBlock()).getColor(state, world, pos, tintIndex)), // handler
         (blocks_supplier_.get().stream()
                 .filter(b->((b instanceof IBlockColorTintSupport) && (((IBlockColorTintSupport)b).hasColorTint()))).toList()).toArray(new Block[]{}) // supporting blocks
@@ -72,7 +72,7 @@ public final class ColorUtils
   public static void registerItemColourHandlers(final RegisterColorHandlersEvent.Item event)
   {
     if(!items_supplier_.get().isEmpty()) {
-      event.getItemColors().register(
+      event.register(
         (ItemStack stack, int tintIndex) -> (((IItemColorTintSupport)(stack.getItem())).getColor(stack, tintIndex)),
         items_supplier_.get().stream()
                 .filter(e->((e instanceof IItemColorTintSupport) && (((IItemColorTintSupport)e).hasColorTint()))).toList().toArray(new ItemLike[]{})

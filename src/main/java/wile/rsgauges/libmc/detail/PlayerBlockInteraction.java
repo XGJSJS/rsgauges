@@ -31,8 +31,7 @@ public class PlayerBlockInteraction
     { return false; }
   }
 
-  public static void init(String modid, Logger logger)
-  {
+  public static void init() {
     MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST,false, PlayerInteractEvent.class, PlayerBlockInteraction::onPlayerInteract);
   }
 

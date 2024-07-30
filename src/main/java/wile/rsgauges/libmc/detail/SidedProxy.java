@@ -55,7 +55,7 @@ public class SidedProxy
   {
     public @Nullable Player getPlayerClientSide() { return Minecraft.getInstance().player; }
     public @Nullable Level getWorldClientSide() { return Minecraft.getInstance().level; }
-    public @Nullable Minecraft mc() { return Minecraft.getInstance(); }
+    public Minecraft mc() { return Minecraft.getInstance(); }
     public Optional<Boolean> isCtrlDown() { return Optional.of(Auxiliaries.isCtrlDown()); }
     public Optional<Boolean> isShiftDown() { return Optional.of(Auxiliaries.isShiftDown()); }
   }

@@ -18,8 +18,4 @@ public final class ModBlockItem extends BlockItem
   public ModBlockItem(Block blockIn, Item.Properties builder)
   { super(blockIn, builder); }
 
-  @Override
-  public Collection<CreativeModeTab> getCreativeTabs()
-  { return ModConfig.isOptedOut(this) ? (DISABLED_TABS) : (Collections.singletonList(Registries.getCreativeModeTab())); }
-
 }

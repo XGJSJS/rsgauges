@@ -24,6 +24,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.ColorUtils;
 
@@ -82,12 +84,14 @@ public class SensitiveGlassBlock extends RsBlock
   }
 
   @Override
-  public boolean isPossibleToRespawnInThis()
-  { return false; }
+  public boolean isPossibleToRespawnInThis(BlockState state) {
+    return false;
+  }
 
   @Override
-  public boolean shouldCheckWeakPower(BlockState state, LevelReader world, BlockPos pos, Direction side)
-  { return true; }
+  public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side) {
+    return false;
+  }
 
   @Override
   protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
@@ -107,7 +111,7 @@ public class SensitiveGlassBlock extends RsBlock
   { return true; }
 
   @Override
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     final BlockState state = super.getStateForPlacement(context);
     return (state==null) ? (null) : (state.setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos())));

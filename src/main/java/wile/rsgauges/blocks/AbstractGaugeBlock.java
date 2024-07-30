@@ -34,6 +34,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModConfig;
 import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
@@ -133,8 +135,9 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
   }
 
   @Override
-  public boolean shouldCheckWeakPower(BlockState state, LevelReader world, BlockPos pos, Direction side)
-  { return false; }
+  public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side) {
+    return false;
+  }
 
   @Override
   public boolean getWeakChanges(BlockState state, LevelReader world, BlockPos pos)
@@ -150,7 +153,7 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     final BlockState state = super.getStateForPlacement(context);
     return (state==null) ? (null) : ((state.hasProperty(GaugeBlock.POWER)) ? (state.setValue(GaugeBlock.POWER, 0)) : (state));

@@ -146,9 +146,9 @@ public class Auxiliaries
     final String ft = tr.getString();
     if(ft.contains("${")) {
       // Non-recursive, non-argument lang file entry cross referencing.
-      Pattern pt = Pattern.compile("\\$\\{([^}]+)\\}");
+      Pattern pt = Pattern.compile("\\$\\{([^}]+)}");
       Matcher mt = pt.matcher(ft);
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       while(mt.find()) {
         String m = mt.group(1);
         if(m.contains("?")) {
@@ -256,13 +256,11 @@ public class Auxiliaries
   // Tag Handling
   // -------------------------------------------------------------------------------------------------------------------
 
-  @SuppressWarnings("deprecation")
   public static boolean isInItemTag(Item item, ResourceLocation tag)
   {
     return ForgeRegistries.ITEMS.tags().stream().filter(tg->tg.getKey().location().equals(tag)).anyMatch(tk->tk.contains(item));
   }
 
-  @SuppressWarnings("deprecation")
   public static boolean isInBlockTag(Block block, ResourceLocation tag)
   { return ForgeRegistries.BLOCKS.tags().stream().filter(tg->tg.getKey().location().equals(tag)).anyMatch(tk->tk.contains(block)); }
 

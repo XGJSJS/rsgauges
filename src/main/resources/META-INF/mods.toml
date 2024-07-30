@@ -1,7 +1,7 @@
 # @file mods.toml
 # @spec TOML v0.5.0 (https://github.com/toml-lang/toml)
 modLoader="javafml" # forge FML java
-loaderVersion="[43,)"
+loaderVersion="[47,)"
 issueTrackerURL="https://github.com/stfwi/rsgauges/issues/"
 license="MIT"
 
@@ -26,6 +26,6 @@ logoFile="logo.png"
 [[dependencies.rsgauges]]
   modId="minecraft"
   mandatory=true
-  versionRange="[1.19.2]"
+  versionRange="[1.20.1]"
   ordering="NONE"
   side="BOTH"

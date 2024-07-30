@@ -45,6 +45,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -52,6 +53,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Networking;
 
@@ -59,17 +61,16 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-
 public abstract class RsBlock extends Block implements EntityBlock
 {
-  public static final long RSBLOCK_CONFIG_SOLID              = 0x0000000000000000l;
-  public static final long RSBLOCK_CONFIG_CUTOUT             = 0x1000000000000000l;
-  public static final long RSBLOCK_CONFIG_CUTOUT_MIPPED      = 0x2000000000000000l;
-  public static final long RSBLOCK_CONFIG_TRANSLUCENT        = 0x3000000000000000l;
-  public static final long RSBLOCK_NOT_WATERLOGGABLE         = 0x0008000000000000l;
+  public static final long RSBLOCK_CONFIG_SOLID              = 0x0000000000000000L;
+  public static final long RSBLOCK_CONFIG_CUTOUT             = 0x1000000000000000L;
+  public static final long RSBLOCK_CONFIG_CUTOUT_MIPPED      = 0x2000000000000000L;
+  public static final long RSBLOCK_CONFIG_TRANSLUCENT        = 0x3000000000000000L;
+  public static final long RSBLOCK_NOT_WATERLOGGABLE         = 0x0008000000000000L;
   public enum RenderTypeHint { SOLID,CUTOUT,CUTOUT_MIPPED,TRANSLUCENT }
 
-  private static final RenderTypeHint render_layer_map_[] = { RenderTypeHint.SOLID, RenderTypeHint.CUTOUT, RenderTypeHint.CUTOUT_MIPPED, RenderTypeHint.TRANSLUCENT };
+  private static final RenderTypeHint[] render_layer_map_ = { RenderTypeHint.SOLID, RenderTypeHint.CUTOUT, RenderTypeHint.CUTOUT_MIPPED, RenderTypeHint.TRANSLUCENT };
   public final long config;
 
   public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -90,12 +91,12 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @Nullable
-  public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> te_type)
+  public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NotNull BlockState state, @NotNull BlockEntityType<T> te_type)
   { return (world.isClientSide) ? (null) : ((Level w, BlockPos p, BlockState s, T te) -> ((RsTileEntity)te).tick()); } // To be evaluated if
 
   @Override
   @Nullable
-  public <T extends BlockEntity> GameEventListener getListener(ServerLevel p_221121_, T te)
+  public <T extends BlockEntity> GameEventListener getListener(@NotNull ServerLevel p_221121_, @NotNull T te)
   { return null; }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @OnlyIn(Dist.CLIENT)
-  public void appendHoverText(final ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag)
+  public void appendHoverText(final @NotNull ItemStack stack, @Nullable BlockGetter world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag)
   { Auxiliaries.Tooltip.addInformation(stack, world, tooltip, flag, true); }
 
   @OnlyIn(Dist.CLIENT)
@@ -114,34 +115,29 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @SuppressWarnings("deprecation")
-  public VoxelShape getShape(BlockState state, BlockGetter source, BlockPos pos, CollisionContext selectionContext)
+  public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter source, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return Shapes.block(); }
 
   @Override
   @SuppressWarnings("deprecation")
-  public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext selectionContext)
+  public @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return getShape(state, world, pos, selectionContext); }
-
-  @Override
-  public boolean isPossibleToRespawnInThis()
-  { return false; }
 
   @Override
   public boolean isValidSpawn(BlockState state, BlockGetter world, BlockPos pos, SpawnPlacements.Type type, @Nullable EntityType<?> entityType)
   { return false; }
 
   @Override
-  @SuppressWarnings("deprecation")
   public PushReaction getPistonPushReaction(BlockState state)
   { return PushReaction.DESTROY; }
 
   @Override
-  protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+  protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder)
   { super.createBlockStateDefinition(builder); builder.add(WATERLOGGED); }
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext context)
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
   {
     BlockState state = super.getStateForPlacement(context);
     if(state==null) return null;
@@ -156,11 +152,11 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @SuppressWarnings("deprecation")
-  public FluidState getFluidState(BlockState state)
+  public @NotNull FluidState getFluidState(@NotNull BlockState state)
   { return ((config & RSBLOCK_NOT_WATERLOGGABLE)==0) ? (state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state)) : super.getFluidState(state); }
 
   @Override
-  public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos)
+  public boolean propagatesSkylightDown(@NotNull BlockState state, @NotNull BlockGetter reader, @NotNull BlockPos pos)
   {
     if(((config & RSBLOCK_NOT_WATERLOGGABLE)==0) && state.getValue(WATERLOGGED)) return false;
     return super.propagatesSkylightDown(state, reader, pos);
@@ -168,7 +164,7 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @SuppressWarnings("deprecation")
-  public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
+  public void onRemove(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull BlockState newState, boolean isMoving)
   {
     super.onRemove(state, world, pos, newState, isMoving);
     world.updateNeighbourForOutputSignal(pos, newState.getBlock());
@@ -177,7 +173,7 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @SuppressWarnings("deprecation")
-  public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
+  public @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction facing, @NotNull BlockState facingState, @NotNull LevelAccessor world, @NotNull BlockPos pos, @NotNull BlockPos facingPos)
   {
     if((config & RSBLOCK_NOT_WATERLOGGABLE)==0) {
       if(state.getValue(WATERLOGGED)) world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
@@ -187,27 +183,27 @@ public abstract class RsBlock extends Block implements EntityBlock
 
   @Override
   @SuppressWarnings("deprecation")
-  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+  public void neighborChanged(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving)
+  {}
+
+  @Override
+  public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+    return Collections.singletonList(new ItemStack(state.getBlock().asItem()));
+  }
+
+  @Override
+  @SuppressWarnings("deprecation")
+  public void attack(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player)
   {}
 
   @Override
   @SuppressWarnings("deprecation")
-  public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-  { return Collections.singletonList(new ItemStack(state.getBlock().asItem())); }
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public void attack(BlockState state, Level world, BlockPos pos, Player player)
-  {}
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
   { return InteractionResult.PASS; }
 
   @Override
   @SuppressWarnings("deprecation")
-  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rnd)
+  public void tick(@NotNull BlockState state, @NotNull ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource rnd)
   {}
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -249,11 +245,11 @@ public abstract class RsBlock extends Block implements EntityBlock
     // --------------------------------------------------------------------------------------------------------
 
     @Override
-    public final void saveAdditional(CompoundTag nbt)
+    public final void saveAdditional(@NotNull CompoundTag nbt)
     { super.saveAdditional(nbt); write(nbt, false); }
 
     @Override
-    public final void load(CompoundTag nbt)
+    public final void load(@NotNull CompoundTag nbt)
     { super.load(nbt); read(nbt, false); }
   }
 

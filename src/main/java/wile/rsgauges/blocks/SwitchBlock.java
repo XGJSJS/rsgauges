@@ -46,6 +46,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import wile.rsgauges.ModConfig;
 import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
@@ -56,64 +58,62 @@ import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
-
 
 @SuppressWarnings("unused")
 public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchLink.ISwitchLinkable
 {
   // -- Entity stored changable state data.
-  public static final long SWITCH_DATA_POWERED_POWER_MASK       = 0x000000000000000fl;
-  public static final long SWITCH_DATA_RESERVED_MASK            = 0x00000000000000f0l;
-  public static final long SWITCH_DATA_INVERTED                 = 0x0000000000000100l;
-  public static final long SWITCH_DATA_WEAK                     = 0x0000000000000200l;
-  public static final long SWITCH_DATA_NOOUTPUT                 = 0x0000000000000400l;
+  public static final long SWITCH_DATA_POWERED_POWER_MASK       = 0x000000000000000fL;
+  public static final long SWITCH_DATA_RESERVED_MASK            = 0x00000000000000f0L;
+  public static final long SWITCH_DATA_INVERTED                 = 0x0000000000000100L;
+  public static final long SWITCH_DATA_WEAK                     = 0x0000000000000200L;
+  public static final long SWITCH_DATA_NOOUTPUT                 = 0x0000000000000400L;
   // -- Full block multiside output control
-  public static final long SWITCH_DATA_SIDE_ENABLED_BOTTOM      = 0x0000000000001000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_TOP         = 0x0000000000002000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_FRONT       = 0x0000000000004000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_BACK        = 0x0000000000008000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_LEFT        = 0x0000000000010000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_RIGHT       = 0x0000000000020000l;
-  public static final long SWITCH_DATA_SIDE_ENABLED_ALL         = 0x000000000003f000l;
+  public static final long SWITCH_DATA_SIDE_ENABLED_BOTTOM      = 0x0000000000001000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_TOP         = 0x0000000000002000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_FRONT       = 0x0000000000004000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_BACK        = 0x0000000000008000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_LEFT        = 0x0000000000010000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_RIGHT       = 0x0000000000020000L;
+  public static final long SWITCH_DATA_SIDE_ENABLED_ALL         = 0x000000000003f000L;
   public static final long SWITCH_DATA_SIDE_ENABLED_MASK        = SWITCH_DATA_SIDE_ENABLED_ALL;
   public static final long SWITCH_DATA_SIDE_ENABLED_SHIFT       = 12;
-  public static final long SWITCH_DATA_ENTITY_DEFAULTS_MASK     = 0x000000000003ffffl;
+  public static final long SWITCH_DATA_ENTITY_DEFAULTS_MASK     = 0x000000000003ffffL;
   // -- Constant construction time switch config
-  public static final long SWITCH_CONFIG_INVERTABLE             = 0x0000000000100000l;
-  public static final long SWITCH_CONFIG_WEAKABLE               = 0x0000000000200000l;
-  public static final long SWITCH_CONFIG_PULSETIME_CONFIGURABLE = 0x0000000000400000l;
-  public static final long SWITCH_CONFIG_TOUCH_CONFIGURABLE     = 0x0000000000800000l;
-  public static final long SWITCH_CONFIG_PULSE_EXTENDABLE       = 0x0000000001000000l;
-  public static final long SWITCH_CONFIG_LCLICK_RESETTABLE      = 0x0000000002000000l;
-  public static final long SWITCH_CONFIG_BISTABLE               = 0x0000000010000000l;
-  public static final long SWITCH_CONFIG_PULSE                  = 0x0000000020000000l;
-  public static final long SWITCH_CONFIG_CONTACT                = 0x0000000040000000l;
-  public static final long SWITCH_CONFIG_TIMER_DAYTIME          = 0x0000000100000000l; // uses environmental tile entity due to slow update rate
-  public static final long SWITCH_CONFIG_TIMER_INTERVAL         = 0x0000000200000000l;
-  public static final long SWITCH_CONFIG_SENSOR_VOLUME          = 0x0000000400000000l;
-  public static final long SWITCH_CONFIG_SENSOR_LINEAR          = 0x0000000800000000l;
-  public static final long SWITCH_CONFIG_SENSOR_LIGHT           = 0x0000001000000000l;
-  public static final long SWITCH_CONFIG_SENSOR_RAIN            = 0x0000002000000000l;
-  public static final long SWITCH_CONFIG_SENSOR_LIGHTNING       = 0x0000004000000000l;
-  public static final long SWITCH_CONFIG_SENSOR_BLOCKDETECT     = 0x0000008000000000l;
+  public static final long SWITCH_CONFIG_INVERTABLE             = 0x0000000000100000L;
+  public static final long SWITCH_CONFIG_WEAKABLE               = 0x0000000000200000L;
+  public static final long SWITCH_CONFIG_PULSETIME_CONFIGURABLE = 0x0000000000400000L;
+  public static final long SWITCH_CONFIG_TOUCH_CONFIGURABLE     = 0x0000000000800000L;
+  public static final long SWITCH_CONFIG_PULSE_EXTENDABLE       = 0x0000000001000000L;
+  public static final long SWITCH_CONFIG_LCLICK_RESETTABLE      = 0x0000000002000000L;
+  public static final long SWITCH_CONFIG_BISTABLE               = 0x0000000010000000L;
+  public static final long SWITCH_CONFIG_PULSE                  = 0x0000000020000000L;
+  public static final long SWITCH_CONFIG_CONTACT                = 0x0000000040000000L;
+  public static final long SWITCH_CONFIG_TIMER_DAYTIME          = 0x0000000100000000L; // uses environmental tile entity due to slow update rate
+  public static final long SWITCH_CONFIG_TIMER_INTERVAL         = 0x0000000200000000L;
+  public static final long SWITCH_CONFIG_SENSOR_VOLUME          = 0x0000000400000000L;
+  public static final long SWITCH_CONFIG_SENSOR_LINEAR          = 0x0000000800000000L;
+  public static final long SWITCH_CONFIG_SENSOR_LIGHT           = 0x0000001000000000L;
+  public static final long SWITCH_CONFIG_SENSOR_RAIN            = 0x0000002000000000L;
+  public static final long SWITCH_CONFIG_SENSOR_LIGHTNING       = 0x0000004000000000L;
+  public static final long SWITCH_CONFIG_SENSOR_BLOCKDETECT     = 0x0000008000000000L;
   public static final long SWITCH_CONFIG_SENSOR_TIME            = SWITCH_CONFIG_TIMER_INTERVAL;
   public static final long SWITCH_CONFIG_SENSOR_DETECTOR        = SWITCH_CONFIG_SENSOR_VOLUME|SWITCH_CONFIG_SENSOR_LINEAR;
   public static final long SWITCH_CONFIG_SENSOR_ENVIRONMENTAL   = SWITCH_CONFIG_SENSOR_LIGHT|SWITCH_CONFIG_TIMER_DAYTIME|SWITCH_CONFIG_SENSOR_RAIN|SWITCH_CONFIG_SENSOR_LIGHTNING;
   public static final long SWITCH_CONFIG_AUTOMATIC              = SWITCH_CONFIG_SENSOR_TIME|SWITCH_CONFIG_SENSOR_DETECTOR|SWITCH_CONFIG_SENSOR_ENVIRONMENTAL|SWITCH_CONFIG_SENSOR_BLOCKDETECT;
-  public static final long SWITCH_CONFIG_PROJECTILE_SENSE_ON    = 0x0000100000000000l;
-  public static final long SWITCH_CONFIG_PROJECTILE_SENSE_OFF   = 0x0000200000000000l;
+  public static final long SWITCH_CONFIG_PROJECTILE_SENSE_ON    = 0x0000100000000000L;
+  public static final long SWITCH_CONFIG_PROJECTILE_SENSE_OFF   = 0x0000200000000000L;
   public static final long SWITCH_CONFIG_PROJECTILE_SENSE       = SWITCH_CONFIG_PROJECTILE_SENSE_ON|SWITCH_CONFIG_PROJECTILE_SENSE_OFF;
-  public static final long SWITCH_CONFIG_SHOCK_SENSITIVE        = 0x0000400000000000l;
-  public static final long SWITCH_CONFIG_HIGH_SENSITIVE         = 0x0000800000000000l;
+  public static final long SWITCH_CONFIG_SHOCK_SENSITIVE        = 0x0000400000000000L;
+  public static final long SWITCH_CONFIG_HIGH_SENSITIVE         = 0x0000800000000000L;
   public static final long SWITCH_CONFIG_TRANSLUCENT            = RSBLOCK_CONFIG_TRANSLUCENT;
-  public static final long SWITCH_CONFIG_NOT_PASSABLE           = 0x0010000000000000l;
-  public static final long SWITCH_CONFIG_SIDES_CONFIGURABLE     = 0x0040000000000000l;
-  public static final long SWITCH_CONFIG_LINK_SOURCE_SUPPORT    = 0x0100000000000000l;
-  public static final long SWITCH_CONFIG_LINK_TARGET_SUPPORT    = 0x0200000000000000l;
-  public static final long SWITCH_CONFIG_LINK_SENDER            = 0x0400000000000000l;
+  public static final long SWITCH_CONFIG_NOT_PASSABLE           = 0x0010000000000000L;
+  public static final long SWITCH_CONFIG_SIDES_CONFIGURABLE     = 0x0040000000000000L;
+  public static final long SWITCH_CONFIG_LINK_SOURCE_SUPPORT    = 0x0100000000000000L;
+  public static final long SWITCH_CONFIG_LINK_TARGET_SUPPORT    = 0x0200000000000000L;
+  public static final long SWITCH_CONFIG_LINK_SENDER            = 0x0400000000000000L;
 
   public static final long SWITCH_CONFIG_WALLMOUNT              = RSBLOCK_CONFIG_WALLMOUNT;
   public static final long SWITCH_CONFIG_LATERAL                = RSBLOCK_CONFIG_LATERAL;
@@ -167,12 +167,12 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
 
   @Override
   @SuppressWarnings("deprecation")
-  public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext selectionContext)
+  public @NotNull VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext selectionContext)
   { return ((config & SWITCH_CONFIG_NOT_PASSABLE)==0) ? (Shapes.empty()) : (getShape(state, world, pos, selectionContext)); }
 
   @Override
   @SuppressWarnings("deprecation")
-  public boolean isSignalSource(BlockState state)
+  public boolean isSignalSource(@NotNull BlockState state)
   { return ((config &SWITCH_CONFIG_LINK_SENDER)==0); }
 
   @Override
@@ -181,16 +181,16 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
 
   @Override
   @SuppressWarnings("deprecation")
-  public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+  public int getSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction side)
   { return getPower(state, world, pos, side, false); }
 
   @Override
   @SuppressWarnings("deprecation")
-  public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+  public int getDirectSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction side)
   { return getPower(state, world, pos, side, true); }
 
   @Override
-  public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
+  public void setPlacedBy(@NotNull Level world, @NotNull BlockPos pos, @NotNull BlockState state, @Nullable LivingEntity placer, @NotNull ItemStack stack)
   {
     final SwitchTileEntity te = getTe(world, pos);
     if(te != null) te.reset(world);
@@ -199,7 +199,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
+  public void onRemove(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, BlockState newState, boolean isMoving)
   {
     if(!newState.is(this)) {
       final SwitchTileEntity te = getTe(world, pos);
@@ -214,7 +214,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
 
   @Override
   @SuppressWarnings("deprecation")
-  public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity)
+  public void entityInside(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Entity entity)
   {
     if(world.isClientSide() || ((config & SWITCH_CONFIG_PROJECTILE_SENSE)==0) || (!(entity instanceof Projectile))) return;
     if(state.getValue(POWERED)) {
@@ -226,7 +226,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
   {
     SwitchTileEntity te = getTe(world, pos);
     if(te==null) return InteractionResult.FAIL;
@@ -260,7 +260,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  public void attack(BlockState state, Level world, BlockPos pos, Player player)
+  public void attack(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player)
   {
     if(world.isClientSide()) return;
     final SwitchTileEntity te = getTe(world, pos);
@@ -341,7 +341,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random)
+  public void tick(BlockState state, @NotNull ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource random)
   {
     if(!state.getValue(POWERED)) return; // scheduler tick only allowed when currently active.
     final SwitchTileEntity te = getTe(world, pos);
@@ -358,7 +358,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new SwitchTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -389,7 +389,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       if((te==null)) return;
       final long disabled_sides = te.enabled_sides();
       for(Direction facing: Direction.values()) {
-        if((disabled_sides & ((1l<<getAbsoluteFacing(state, facing).get3DDataValue()) << SWITCH_DATA_SIDE_ENABLED_SHIFT)) == 0) continue;
+        if((disabled_sides & ((1L <<getAbsoluteFacing(state, facing).get3DDataValue()) << SWITCH_DATA_SIDE_ENABLED_SHIFT)) == 0) continue;
         if(net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, state, java.util.EnumSet.of(facing), false).isCanceled()) continue;
         world.neighborChanged(pos.relative(facing), this, pos);
         if(force || !te.weak()) world.updateNeighborsAtExceptFromFacing(pos.relative(facing), this, facing.getOpposite());
@@ -637,13 +637,13 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     }
 
     public int configured_on_time()
-    { return ((svd_ & SWITCH_DATA_SVD_ACTIVE_TIME_MASK) >> 0); }
+    { return ((svd_ & SWITCH_DATA_SVD_ACTIVE_TIME_MASK)); }
 
     public void configured_on_time(int t)
-    { svd_ = (svd_ & (~SWITCH_DATA_SVD_ACTIVE_TIME_MASK)) | ((t & SWITCH_DATA_SVD_ACTIVE_TIME_MASK) << 0); }
+    { svd_ = (svd_ & (~SWITCH_DATA_SVD_ACTIVE_TIME_MASK)) | ((t & SWITCH_DATA_SVD_ACTIVE_TIME_MASK)); }
 
     public int setpower()
-    { return ((scd_ & ((int)SWITCH_DATA_POWERED_POWER_MASK)) >> 0); }
+    { return ((scd_ & ((int) SWITCH_DATA_POWERED_POWER_MASK))); }
 
     public boolean inverted()
     { return ((scd_ & ((int)SWITCH_DATA_INVERTED)) != 0); }
@@ -658,7 +658,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     { return (scd_ & (SWITCH_DATA_SIDE_ENABLED_MASK)); }
 
     public void setpower(int p)
-    { scd_ = (scd_ & ~((int)SWITCH_DATA_POWERED_POWER_MASK)) | (int)(((p<0)?0:(Math.min(p, 15)) & ((int)SWITCH_DATA_POWERED_POWER_MASK))<<0); }
+    { scd_ = (scd_ & ~((int)SWITCH_DATA_POWERED_POWER_MASK)) | (int)(((p < 0) ? 0 : (Math.min(p, 15)) & ((int) SWITCH_DATA_POWERED_POWER_MASK))); }
 
     public void inverted(boolean val)
     { if(val) scd_ |= ((int)SWITCH_DATA_INVERTED); else scd_ &= ~((int)SWITCH_DATA_INVERTED); }
@@ -874,7 +874,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
         status.append(Auxiliaries.localizable("switchconfig.options." + (weak() ? "weakinverted" : "stronginverted"), ChatFormatting.DARK_AQUA));
       }
       if(configured_on_time() > 0) {
-        if(statusset) status.append(separator.copy());
+          status.append(separator.copy());
         status.append(Auxiliaries.localizable("switchconfig.options.pulsetime", ChatFormatting.GOLD, new Object[]{
           Double.toString( ((double)(configured_on_time()))/20 ),
           Integer.toString(configured_on_time())
@@ -900,7 +900,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       if((level.isClientSide()) || (last_link_request_ == t)) return false; // not in the same tick, people could try to link A to B and B to A.
       last_link_request_ = t;
       final BlockState state = level.getBlockState(worldPosition);
-      if((state==null) || (!(state.getBlock() instanceof SwitchBlock))) return false;
+      if(!(state.getBlock() instanceof SwitchBlock)) return false;
       return ((((SwitchBlock)state.getBlock()).config & (SWITCH_CONFIG_LINK_TARGET_SUPPORT))!=0);
     }
 
@@ -1097,23 +1097,22 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       ClickInteraction ck = new ClickInteraction();
       if((world==null) || (pos==null)) return ck;
       if(state==null) state = world.getBlockState(pos);
-      if((state==null) || (!(state.getBlock() instanceof SwitchBlock))) return ck;
+      if(!(state.getBlock() instanceof SwitchBlock)) return ck;
       final SwitchBlock block = (SwitchBlock)(state.getBlock());
       final ItemStack item = player.getMainHandItem();
-      if(item == null) return ck;
-      if(item.getItem() == Items.REDSTONE) {
+        if(item.getItem() == Items.REDSTONE) {
         ck.item = Items.REDSTONE;
         ck.item_count = item.getCount();
       } else if(item.getItem() == Items.ENDER_PEARL) {
         ck.item = Items.ENDER_PEARL;
         ck.item_count = item.getCount();
-      } else if(item.getItem() == ModContent.SWITCH_LINK_PEARL) {
-        ck.item = ModContent.SWITCH_LINK_PEARL;
-        ck.item_count = item.getCount();
-      } else if(item.getItem() != Items.AIR) {
-        ck.wrenched = ModConfig.isWrench(item);
-        if(ck.wrenched) return ck;
-      }
+      } else {
+            item.getItem();
+            if(item.getItem() != Items.AIR) {
+              ck.wrenched = ModConfig.isWrench(item);
+              if(ck.wrenched) return ck;
+            }
+        }
       if((facing!=null) && ((block.config & SWITCH_CONFIG_TOUCH_CONFIGURABLE)!=0) && (ck.item != ModContent.SWITCH_LINK_PEARL) && (ck.item != Items.ENDER_PEARL)) {
         return touch(ck, state, facing, x,y,z);
       } else {
