@@ -14,12 +14,7 @@ import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
 
-
-public class PowerPlantBlock extends ContactSwitchBlock
-{
+public class PowerPlantBlock extends ContactSwitchBlock {
   public PowerPlantBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
-
-  public PowerPlantBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 }

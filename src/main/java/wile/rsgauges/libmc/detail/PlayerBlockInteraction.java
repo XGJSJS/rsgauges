@@ -20,23 +20,19 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.EventPriority;
-import org.apache.logging.log4j.Logger;
 
-
-public class PlayerBlockInteraction
-{
-  public interface INeighbourBlockInteractionSensitive
-  {
-    default boolean onNeighborBlockPlayerInteraction(Level world, BlockPos pos, BlockState state, BlockPos fromPos, LivingEntity entity, InteractionHand hand, boolean isLeftClick)
-    { return false; }
+public class PlayerBlockInteraction {
+  public interface INeighbourBlockInteractionSensitive {
+    default boolean onNeighborBlockPlayerInteraction(Level world, BlockPos pos, BlockState state, BlockPos fromPos, LivingEntity entity, InteractionHand hand, boolean isLeftClick) {
+      return false;
+    }
   }
 
   public static void init() {
     MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST,false, PlayerInteractEvent.class, PlayerBlockInteraction::onPlayerInteract);
   }
 
-  public static void onPlayerInteract(PlayerInteractEvent event)
-  {
+  public static void onPlayerInteract(PlayerInteractEvent event) {
     final Level world = event.getLevel();
     if(world.isClientSide()) return;
     final boolean is_rclick = (event instanceof RightClickBlock) && (event.getHand()==InteractionHand.MAIN_HAND);
@@ -53,5 +49,4 @@ public class PlayerBlockInteraction
       }
     }
   }
-
 }

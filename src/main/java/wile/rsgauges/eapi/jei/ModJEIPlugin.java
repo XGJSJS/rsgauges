@@ -7,10 +7,9 @@
  * JEI plugin (see https://github.com/mezz/JustEnoughItems/wiki/Creating-Plugins)
  */
 package wile.rsgauges.eapi.jei;
-/*
-public class JEIPlugin {}
-*/
 
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModConfig;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Registries;
@@ -27,34 +27,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-@mezz.jei.api.JeiPlugin
-public class JEIPlugin implements mezz.jei.api.IModPlugin
-{
+@JeiPlugin
+public class ModJEIPlugin implements IModPlugin {
   @Override
-  public ResourceLocation getPluginUid()
-  { return new ResourceLocation(Auxiliaries.modid(), "jei_plugin_uid"); }
+  public @NotNull ResourceLocation getPluginUid() {
+    return new ResourceLocation(Auxiliaries.modid(), "jei_plugin_uid");
+  }
 
   @Override
-  public void onRuntimeAvailable(IJeiRuntime jeiRuntime)
-  {
+  public void onRuntimeAvailable(@NotNull IJeiRuntime jeiRuntime) {
     HashSet<Item> blacklisted = new HashSet<>();
-    for(Block e: Registries.getRegisteredBlocks()) {
-      if(ModConfig.isOptedOut(e) && (ForgeRegistries.ITEMS.getKey(e.asItem()).getPath()).equals((ForgeRegistries.BLOCKS.getKey(e).getPath()))) {
+    for (Block e : Registries.getRegisteredBlocks()) {
+      if (ModConfig.isOptedOut(e) && (ForgeRegistries.ITEMS.getKey(e.asItem()).getPath()).equals((ForgeRegistries.BLOCKS.getKey(e).getPath()))) {
         blacklisted.add(e.asItem());
       }
     }
-    for(Item e: Registries.getRegisteredItems()) {
-      if(ModConfig.isOptedOut(e) && (!(e instanceof BlockItem))) {
+    for (Item e : Registries.getRegisteredItems()) {
+      if (ModConfig.isOptedOut(e) && (!(e instanceof BlockItem))) {
         blacklisted.add(e);
       }
     }
-    if(!blacklisted.isEmpty()) {
+    if (!blacklisted.isEmpty()) {
       List<ItemStack> blacklist = blacklisted.stream().map(ItemStack::new).collect(Collectors.toList());
       try {
         jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, blacklist);
-      } catch(Exception e) {
-        Auxiliaries.logger().warn("Exception in JEI opt-out processing: '" + e.getMessage() + "', skipping further JEI optout processing.");
+      } catch (Exception e) {
+          Auxiliaries.logger().warn("Exception in JEI opt-out processing: '{}', skipping further JEI optout processing.", e.getMessage());
       }
     }
   }

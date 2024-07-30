@@ -23,10 +23,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 
-public class Overlay
-{
-  public static void register()
-  {
+public class Overlay {
+  public static void register() {
     if(SidedProxy.mc() != null) {
       MinecraftForge.EVENT_BUS.register(new TextOverlayGui());
       Networking.OverlayTextMessage.setHandler(TextOverlayGui::show);
@@ -48,35 +46,16 @@ public class Overlay
   public static class TextOverlayGui extends Screen
   {
     private static final Component EMPTY_TEXT = Component.literal("");
-    private static double overlay_y_ = 0.75;
-    private static int text_color_ = 0x00ffaa00;
-    private static int border_color_ = 0xaa333333;
-    private static int background_color1_ = 0xaa333333;
-    private static int background_color2_ = 0xaa444444;
-    private final Minecraft mc;
+    private static final double overlay_y_ = 0.75;
+      private final Minecraft mc;
     private static long deadline_;
     private static Component text_;
-
-    public static void on_config(double overlay_y)
-    { on_config(overlay_y, 0x00ffaa00, 0xaa333333, 0xaa333333, 0xaa444444); }
-
-    public static void on_config(double overlay_y, int text_color, int border_color, int background_color1, int background_color2)
-    {
-      overlay_y_ = overlay_y;
-      text_color_ = text_color;
-      border_color_ = border_color;
-      background_color1_ = background_color1;
-      background_color2_ = background_color2;
-    }
 
     public static synchronized Component text()
     { return text_; }
 
     public static synchronized long deadline()
     { return deadline_; }
-
-    public static synchronized void hide()
-    { deadline_ = 0; text_ = EMPTY_TEXT; }
 
     public static synchronized void show(Component s, int displayTimeoutMs)
     { text_ = (s==null)?(EMPTY_TEXT):(s.copy()); deadline_ = System.currentTimeMillis() + displayTimeoutMs; }
@@ -98,7 +77,6 @@ public class Overlay
       GuiGraphics mxs = event.getGuiGraphics();
       final Window win = mc.getWindow();
       final Font fr = mc.font;
-      final boolean was_unicode = fr.isBidirectional();
       final int cx = win.getGuiScaledWidth() / 2;
       final int cy = (int)(win.getGuiScaledHeight() * overlay_y_);
       final int w = fr.width(txt);

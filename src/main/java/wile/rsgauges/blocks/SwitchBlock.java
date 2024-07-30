@@ -49,7 +49,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import wile.rsgauges.ModConfig;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.SwitchLink;
 import wile.rsgauges.detail.SwitchLink.LinkMode;
@@ -57,6 +56,7 @@ import wile.rsgauges.detail.SwitchLink.RequestResult;
 import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -162,11 +162,6 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   { super.createBlockStateDefinition(builder); builder.add(POWERED); }
 
   @Override
-  public RenderTypeHint getRenderTypeHint()
-  { return ((config & SWITCH_CONFIG_TRANSLUCENT) != 0) ? (RenderTypeHint.TRANSLUCENT) : (RenderTypeHint.CUTOUT); }
-
-  @Override
-  @SuppressWarnings("deprecation")
   public @NotNull VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext selectionContext)
   { return ((config & SWITCH_CONFIG_NOT_PASSABLE)==0) ? (Shapes.empty()) : (getShape(state, world, pos, selectionContext)); }
 
@@ -246,13 +241,13 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       (!ModConfig.without_rightclick_item_switchconfig) &&
         (  ((ck.item==Items.REDSTONE) && (((SwitchBlock)state.getBlock()).config & SWITCH_CONFIG_PULSETIME_CONFIGURABLE) != 0)
           || (ck.item==Items.ENDER_PEARL)
-          || (ck.item==ModContent.SWITCH_LINK_PEARL)
+          || (ck.item == Registries.getItem("switchlink_pearl"))
         )
     ) {
       attack(state, world, pos, player);
       return InteractionResult.CONSUME;
     }
-    if((config & (SWITCH_CONFIG_BISTABLE|SWITCH_CONFIG_PULSE))==0) {
+    if ((config & (SWITCH_CONFIG_BISTABLE|SWITCH_CONFIG_PULSE))==0) {
       return InteractionResult.CONSUME;
     } else {
       return onSwitchActivated(world, pos, state, player, hit.getDirection()) ? InteractionResult.CONSUME : InteractionResult.FAIL;
@@ -265,7 +260,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     if(world.isClientSide()) return;
     final SwitchTileEntity te = getTe(world, pos);
     if(te == null) return;
-    final Item item_held = player.getInventory().getSelected().getItem();
+    final ItemStack item_held = player.getInventory().getSelected();
     ClickInteraction ck = ClickInteraction.get(state, world, pos, player);
     if(ck.wrenched) {
       // Switch output config using an accepted wrench with a single click
@@ -298,31 +293,31 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
           }
         }
       }
-    } else if((ck.item==ModContent.SWITCH_LINK_PEARL) && (item_held==ModContent.SWITCH_LINK_PEARL)) {
-      // Link config at source switch or assignemnt of target switch
-      if(!ModConfig.without_switch_linking) {
-        switch (te.assignSwitchLink(world, pos, player.getInventory().getSelected())) {
-          case OK -> {
-            player.getInventory().getSelected().shrink(1);
-            ModResources.BlockSoundEvents.SWITCHLINK_LINK_SOURCE_SELECTED.play(world, pos);
-            Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.ok"));
-            return;
+    } else if ((ck.item == Registries.getItem("switchlink_pearl")) && (item_held.getItem() == Registries.getItem("switchlink_pearl"))) {
+        // Link config at source switch or assignemnt of target switch
+        if(!ModConfig.without_switch_linking) {
+          switch (te.assignSwitchLink(world, pos, player.getInventory().getSelected())) {
+            case OK -> {
+              player.getInventory().getSelected().shrink(1);
+              ModResources.BlockSoundEvents.SWITCHLINK_LINK_SOURCE_SELECTED.play(world, pos);
+              Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.ok"));
+              return;
+            }
+            case E_SELF_ASSIGN -> {
+              SwitchLinkPearlItem.cycleLinkMode(player.getInventory().getSelected(), world, pos, true);
+              Overlay.show(player, Auxiliaries.localizable("switchlinking.relayconfig.confval" + SwitchLink.fromItemStack(player.getInventory().getSelected()).mode().index()));
+              return;
+            }
+            case E_NOSOURCE -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_nosource"));
+            case E_ALREADY_LINKED -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_alreadylinked"));
+            case E_TOO_FAR -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_toofaraway"));
+            case E_FAILED -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_failed"));
           }
-          case E_SELF_ASSIGN -> {
-            SwitchLinkPearlItem.cycleLinkMode(player.getInventory().getSelected(), world, pos, true);
-            Overlay.show(player, Auxiliaries.localizable("switchlinking.relayconfig.confval" + Integer.toString(SwitchLink.fromItemStack(player.getInventory().getSelected()).mode().index())));
-            return;
-          }
-          case E_NOSOURCE -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_nosource"));
-          case E_ALREADY_LINKED -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_alreadylinked"));
-          case E_TOO_FAR -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_toofaraway"));
-          case E_FAILED -> Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_failed"));
+          ModResources.BlockSoundEvents.SWITCHLINK_LINK_SOURCE_FAILED.play(world, pos);
         }
-        ModResources.BlockSoundEvents.SWITCHLINK_LINK_SOURCE_FAILED.play(world, pos);
-      }
-      return;
+        return;
     }
-    if((item_held==Items.AIR) && te.click_config(this, true)) {
+      if((item_held.isEmpty()) && te.click_config(this, true)) {
       // left double click config
       ModResources.BlockSoundEvents.DEFAULT_SWITCH_CONFIGCLICK.play(world, pos);
       Overlay.show(player, te.configStatusTextComponentTranslation((SwitchBlock)state.getBlock()));
@@ -506,10 +501,6 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   { return (config & SwitchBlock.SWITCH_CONFIG_LINK_TARGET_SUPPORT)!=0;}
 
   @Override
-  public boolean switchLinkHasSourceSupport(Level world, BlockPos pos)
-  { return (config & SwitchBlock.SWITCH_CONFIG_LINK_SOURCE_SUPPORT)!=0;}
-
-  @Override
   public boolean switchLinkHasAnalogSupport(Level world, BlockPos pos)
   { return false; }
 
@@ -528,30 +519,6 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   {
     SwitchTileEntity te = getTe(world, pos);
     return (te==null) ? Optional.empty() : Optional.of(te.power(world.getBlockState(pos), false));
-  }
-
-  @Override
-  public Optional<Integer> switchLinkInputPower(Level world, BlockPos pos)
-  {
-    BlockState state = world.getBlockState(pos);
-    if(!(state.getBlock() instanceof SwitchBlock)) return Optional.empty();
-    if(((SwitchBlock)(state.getBlock())).isCube()) {
-      return Optional.of(world.getBestNeighborSignal(pos));
-    } else {
-      Direction facing = state.getValue(FACING);
-      return Optional.of(world.getSignal(pos.relative(facing), facing.getOpposite()));
-    }
-  }
-
-  @Override
-  public Optional<Integer> switchLinkComparatorInput(Level world, BlockPos pos)
-  {
-    BlockState state = world.getBlockState(pos);
-    if(!(state.getBlock() instanceof SwitchBlock)) return Optional.empty();
-    BlockPos adjacent_pos = pos.relative(state.getValue(FACING));
-    BlockState adjacent = world.getBlockState(adjacent_pos);
-    if(!adjacent.hasAnalogOutputSignal()) return Optional.empty();
-    return Optional.of(adjacent.getAnalogOutputSignal(world, adjacent_pos));
   }
 
   @Override
@@ -595,7 +562,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     { super(te_type, pos, state); }
 
     public SwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_switch"), pos, state); }
 
     @Override
     public void write(CompoundTag nbt, boolean updatePacket)
@@ -658,7 +625,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     { return (scd_ & (SWITCH_DATA_SIDE_ENABLED_MASK)); }
 
     public void setpower(int p)
-    { scd_ = (scd_ & ~((int)SWITCH_DATA_POWERED_POWER_MASK)) | (int)(((p < 0) ? 0 : (Math.min(p, 15)) & ((int) SWITCH_DATA_POWERED_POWER_MASK))); }
+    { scd_ = (scd_ & ~((int)SWITCH_DATA_POWERED_POWER_MASK)) | ((p < 0) ? 0 : (Math.min(p, 15)) & ((int) SWITCH_DATA_POWERED_POWER_MASK)); }
 
     public void inverted(boolean val)
     { if(val) scd_ |= ((int)SWITCH_DATA_INVERTED); else scd_ &= ~((int)SWITCH_DATA_INVERTED); }
@@ -985,8 +952,8 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     @Override
     public String toString()
     {
-      return "{x:" + Double.toString(x) + ",y:" + Double.toString(y) + ",touch_configured:" + Boolean.toString(touch_configured)
-        + ",wrenched:" + Boolean.toString(wrenched) + ",item_count:" + Integer.toString(item_count) + "}";
+      return "{x:" + x + ",y:" + y + ",touch_configured:" + touch_configured
+        + ",wrenched:" + wrenched + ",item_count:" + item_count + "}";
     }
 
     /**
@@ -1106,19 +1073,18 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       } else if(item.getItem() == Items.ENDER_PEARL) {
         ck.item = Items.ENDER_PEARL;
         ck.item_count = item.getCount();
-      } else {
-            item.getItem();
-            if(item.getItem() != Items.AIR) {
-              ck.wrenched = ModConfig.isWrench(item);
-              if(ck.wrenched) return ck;
-            }
+      } else if (item.getItem() == Registries.getItem("switchlink_pearl")) {
+          ck.item = Registries.getItem("switchlink_pearl");
+          ck.item_count = item.getCount();
+        } else if (!item.isEmpty()) {
+          ck.wrenched = ModConfig.isWrench(item);
+          if(ck.wrenched) return ck;
         }
-      if((facing!=null) && ((block.config & SWITCH_CONFIG_TOUCH_CONFIGURABLE)!=0) && (ck.item != ModContent.SWITCH_LINK_PEARL) && (ck.item != Items.ENDER_PEARL)) {
+      if((facing!=null) && ((block.config & SWITCH_CONFIG_TOUCH_CONFIGURABLE)!=0) && (ck.item != Registries.getItem("switchlink_pearl")) && (ck.item != Items.ENDER_PEARL)) {
         return touch(ck, state, facing, x,y,z);
       } else {
         return ck;
       }
     }
   }
-
 }

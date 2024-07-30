@@ -32,10 +32,10 @@ import javax.annotation.Nullable;
 
 public abstract class RsDirectedBlock extends RsBlock
 {
-  public static final long RSBLOCK_CONFIG_WALLMOUNT         = 0x4000000000000000l;
-  public static final long RSBLOCK_CONFIG_LATERAL           = 0x8000000000000000l;
-  public static final long RSBLOCK_CONFIG_FULLCUBE          = 0x0000000000000000l;
-  public static final long RSBLOCK_CONFIG_OPOSITE_PLACEMENT = 0x0800000000000000l;
+  public static final long RSBLOCK_CONFIG_WALLMOUNT         = 0x4000000000000000L;
+  public static final long RSBLOCK_CONFIG_LATERAL           = 0x8000000000000000L;
+  public static final long RSBLOCK_CONFIG_FULLCUBE          = 0x0000000000000000L;
+  public static final long RSBLOCK_CONFIG_OPOSITE_PLACEMENT = 0x0800000000000000L;
 
   public static final DirectionProperty FACING = DirectionalBlock.FACING;
   protected final VoxelShape[][] shapes_;
@@ -94,15 +94,15 @@ public abstract class RsDirectedBlock extends RsBlock
   { return shapes_[state.getValue(FACING).get3DDataValue()][0]; }
 
   @Override
-  public VoxelShape getShape(BlockState state, BlockGetter source, BlockPos pos, CollisionContext selectionContext)
+  public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter source, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return getShape(state); }
 
   @Override
-  public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext selectionContext)
+  public @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return getShape(state, world, pos, selectionContext); }
 
   @Override
-  protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+  protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder)
   { super.createBlockStateDefinition(builder); builder.add(FACING); }
 
   @Override
@@ -128,7 +128,7 @@ public abstract class RsDirectedBlock extends RsBlock
 
   @SuppressWarnings("unused")
   @Override
-  public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos currentPos, BlockPos facingPos)
+  public @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction facing, @NotNull BlockState facingState, @NotNull LevelAccessor world, @NotNull BlockPos currentPos, @NotNull BlockPos facingPos)
   {
     if(isCube() || ((!world.isEmptyBlock(facingPos)) && (!facingState.liquid()))) return state;
     Direction blockfacing = state.getValue(FACING);

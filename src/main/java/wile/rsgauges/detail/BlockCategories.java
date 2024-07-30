@@ -111,7 +111,7 @@ public class BlockCategories {
 
     // --------------------------------------------------------------------------------
 
-    matcher_names_ = new ArrayList<String>(); // use case sorted list
+    matcher_names_ = new ArrayList<>(); // use case sorted list
     matcher_names_.add("any");
     matcher_names_.add("solid");
     matcher_names_.add("liquid");

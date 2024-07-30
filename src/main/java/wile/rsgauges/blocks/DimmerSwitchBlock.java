@@ -25,10 +25,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import wile.rsgauges.ModContent;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 
@@ -47,7 +48,7 @@ public class DimmerSwitchBlock extends SwitchBlock
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random)
+  public void tick(BlockState state, @NotNull ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource random)
   {}
 
   @Override
@@ -55,7 +56,7 @@ public class DimmerSwitchBlock extends SwitchBlock
   { super.createBlockStateDefinition(builder); builder.add(POWER); }
 
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
   {
     if((!(state.getBlock() instanceof DimmerSwitchBlock))) return InteractionResult.FAIL;
     if(world.isClientSide()) return InteractionResult.SUCCESS;
@@ -70,7 +71,7 @@ public class DimmerSwitchBlock extends SwitchBlock
         te.setpower(p);
         p = te.setpower();
         Overlay.show(player,
-          Auxiliaries.localizable("switchconfig.dimmerswitch.output_power", ChatFormatting.RED, new Object[]{p})
+          Auxiliaries.localizable("switchconfig.dimmerswitch.output_power", ChatFormatting.RED, p)
         );
         final int state_p = state.getValue(POWER);
         if(state_p!=p) {
@@ -89,7 +90,7 @@ public class DimmerSwitchBlock extends SwitchBlock
       if(te.click_config(this, false)) {
         Overlay.show(player, te.configStatusTextComponentTranslation((SwitchBlock) state.getBlock()));
       }
-    } else if(ck.item== ModContent.SWITCH_LINK_PEARL) {
+    } else if(ck.item == Registries.getItem("switchlink_pearl")) {
       attack(state, world, pos, player);
     }
     return InteractionResult.CONSUME;

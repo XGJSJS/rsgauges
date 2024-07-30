@@ -8,96 +8,33 @@
  */
 package wile.rsgauges.libmc.detail;
 
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.Tags;
-import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public final class ColorUtils
-{
-  /**
-   * Vanilla interface wrapper allowing to filter the tintable blocks during color handler registration.
-   */
-  public interface IBlockColorTintSupport extends BlockColor
-  {
-    default boolean hasColorTint() { return false; }
-    default int getColor(@NotNull BlockState state, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos, int tintIndex) { return 0xffffffff; }
-  }
-
-  public interface IItemColorTintSupport extends ItemColor
-  {
-    default boolean hasColorTint() { return false; }
-    default int getColor(@NotNull ItemStack stack, int tintIndex) { return 0xffffffff; }
-  }
-
-  private static Supplier<List<Block>> blocks_supplier_ = Collections::emptyList;
-  private static Supplier<List<Item>>  items_supplier_  = Collections::emptyList;
-
-  public static void init(Supplier<List<Block>> registeredBlocksSuplier, Supplier<List<Item>> registeredItemsSuplier)
-  { blocks_supplier_ = registeredBlocksSuplier; items_supplier_  = registeredItemsSuplier; }
-
-  @OnlyIn(Dist.CLIENT)
-  public static void registerBlockColourHandlers(final RegisterColorHandlersEvent.Block event)
-  {
-    if(!blocks_supplier_.get().isEmpty()) {
-      event.register(
-        (state, world, pos, tintIndex) -> (((IBlockColorTintSupport)state.getBlock()).getColor(state, world, pos, tintIndex)), // handler
-        (blocks_supplier_.get().stream()
-                .filter(b->((b instanceof IBlockColorTintSupport) && (((IBlockColorTintSupport)b).hasColorTint()))).toList()).toArray(new Block[]{}) // supporting blocks
-      );
-    }
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  public static void registerItemColourHandlers(final RegisterColorHandlersEvent.Item event)
-  {
-    if(!items_supplier_.get().isEmpty()) {
-      event.register(
-        (ItemStack stack, int tintIndex) -> (((IItemColorTintSupport)(stack.getItem())).getColor(stack, tintIndex)),
-        items_supplier_.get().stream()
-                .filter(e->((e instanceof IItemColorTintSupport) && (((IItemColorTintSupport)e).hasColorTint()))).toList().toArray(new ItemLike[]{})
-      );
-    }
-  }
+public final class ColorUtils {
 
   // -------------------------------------------------------------------------------------------------------------------
   // Dyes
   // -------------------------------------------------------------------------------------------------------------------
 
-  public static class DyeColorProperty extends EnumProperty<DyeColor>
-  {
-    public DyeColorProperty(String name)
-    { super(name, DyeColor.class, Arrays.asList(DyeColor.values())); }
+  public static class DyeColorProperty extends EnumProperty<DyeColor> {
+    public DyeColorProperty(String name) {
+      super(name, DyeColor.class, Arrays.asList(DyeColor.values()));
+    }
 
-    public static DyeColorProperty create(String name)
-    { return new DyeColorProperty(name); }
+    public static DyeColorProperty create(String name) {
+      return new DyeColorProperty(name);
+    }
   }
 
-  public static boolean isDye(ItemStack stack)
-  { return getColorFromDyeItem(stack).isPresent(); }
-
-  public static Optional<DyeColor> getColorFromDyeItem(ItemStack stack)
-  {
+  public static Optional<DyeColor> getColorFromDyeItem(ItemStack stack) {
     final Item item = stack.getItem();
     if(item instanceof DyeItem) return Optional.of(((DyeItem)item).getDyeColor());
     // There must be a standard for that somewhere ...
@@ -118,44 +55,5 @@ public final class ColorUtils
     if(stack.is(Tags.Items.DYES_ORANGE)) return Optional.of(DyeColor.ORANGE);
     if(stack.is(Tags.Items.DYES_WHITE)) return Optional.of(DyeColor.WHITE);
     return Optional.empty();
-  }
-
-  /**
-   * Tunable tinting for dye colors.
-   */
-  public static class DyeColorFilters
-  {
-    public static final int WHITE       = 0xf3f3f3;
-    public static final int ORANGE      = 0xF9801D;
-    public static final int MAGENTA     = 0xC74EBD;
-    public static final int LIGHTBLUE   = 0x3AB3DA;
-    public static final int YELLOW      = 0xFED83D;
-    public static final int LIME        = 0x80C71F;
-    public static final int PINK        = 0xF38BAA;
-    public static final int GRAY        = 0x474F52;
-    public static final int SILVER      = 0x9D9D97;
-    public static final int CYAN        = 0x169C9C;
-    public static final int PURPLE      = 0x8932B8;
-    public static final int BLUE        = 0x3C44AA;
-    public static final int BROWN       = 0x835432;
-    public static final int GREEN       = 0x5E7C16;
-    public static final int RED         = 0xB02E26;
-    public static final int BLACK       = 0x111111;
-    public static final int[] byIndex_  = { WHITE,ORANGE,MAGENTA,LIGHTBLUE,YELLOW,LIME,PINK,GRAY,SILVER,CYAN,PURPLE,BLUE,BROWN,GREEN,RED,BLACK };
-    public static final String[] nameByIndex = { "white","orange","magenta","lightblue","yellow","lime","pink","gray","silver","cyan","purple","blue","brown","green","red","black" };
-
-    public static int byIndex(int idx)
-    { return byIndex_[idx & 0xf]; }
-
-    public static final int[] lightTintByIndex_ = {
-      0xffffff,0xfcbc88,0xe8b5e4,0x9cd8ec,
-      0xffefb3,0xd2f1a7,0xfad1dd,0x97a1a5,
-      0xcececa,0x67e9e9,0xcc9fe5,0x959ada,
-      0xd1a585,0xc4e774,0xe79792,0x808080
-    };
-
-    public static int lightTintByIndex(int idx)
-    { return lightTintByIndex_[idx & 0xf]; }
-
   }
 }

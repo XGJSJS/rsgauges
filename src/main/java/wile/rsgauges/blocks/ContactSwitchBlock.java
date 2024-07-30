@@ -28,15 +28,15 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import wile.rsgauges.ModContent;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -55,14 +55,14 @@ public class ContactSwitchBlock extends SwitchBlock
   { return (side==null) || ((side==(Direction.UP)) && (!isWallMount())) || (side==(state.getValue(FACING).getOpposite())); }
 
   @Override
-  public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, float distance)
+  public void fallOn(@NotNull Level world, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull Entity entity, float distance)
   {
     if(((config & SWITCH_CONFIG_SHOCK_SENSITIVE)!=0)) onEntityCollided(world, pos, world.getBlockState(pos));
     super.fallOn(world, state, pos, entity, distance);
   }
 
   @Override
-  public void stepOn(Level world, BlockPos pos, BlockState state, Entity entity)
+  public void stepOn(Level world, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Entity entity)
   {
     if(world.isClientSide()) return;
     if(((config & (SWITCH_CONFIG_SHOCK_SENSITIVE|SWITCH_CONFIG_HIGH_SENSITIVE))==(SWITCH_CONFIG_SHOCK_SENSITIVE|SWITCH_CONFIG_HIGH_SENSITIVE)) && (!entity.isShiftKeyDown())) {
@@ -71,7 +71,7 @@ public class ContactSwitchBlock extends SwitchBlock
   }
 
   @Override
-  public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity)
+  public void entityInside(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Entity entity)
   {
     if(world.isClientSide()) return;
     if(((config & SWITCH_CONFIG_SHOCK_SENSITIVE)!=0) && (entity.fallDistance < 0.2)) return;
@@ -79,7 +79,7 @@ public class ContactSwitchBlock extends SwitchBlock
   }
 
   @Override
-  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random)
+  public void tick(BlockState state, @NotNull ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource random)
   { if(((config & SWITCH_CONFIG_SHOCK_SENSITIVE)!=0) || (!onEntityCollided(world, pos, state))) super.tick(state, world, pos, random); }
 
   protected boolean onEntityCollided(Level world, BlockPos pos, BlockState state)
@@ -124,7 +124,7 @@ public class ContactSwitchBlock extends SwitchBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new ContactSwitchTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -149,18 +149,15 @@ public class ContactSwitchBlock extends SwitchBlock
    */
   public static class ContactSwitchTileEntity extends SwitchTileEntity
   {
-    public static final Class<?> filter_classes[] = { Entity.class, LivingEntity.class, Player.class, Monster.class, Animal.class, Villager.class, ItemEntity.class };
-    public static final String filter_class_names[] = { "everything", "creatures", "players", "mobs", "animals", "villagers", "objects" };
+    public static final Class<?>[] filter_classes = { Entity.class, LivingEntity.class, Player.class, Monster.class, Animal.class, Villager.class, ItemEntity.class };
+    public static final String[] filter_class_names = { "everything", "creatures", "players", "mobs", "animals", "villagers", "objects" };
     private static final int max_entity_count = 64;
     private boolean high_sensitivity_ = false;
     private int count_threshold_ = 1;
     private int filter_ = 0;
 
-    public ContactSwitchTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
-    { super(te_type, pos, state); }
-
     public ContactSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_CONTACT_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_contact_switch"), pos, state); }
 
     public int filter()
     { return filter_; }
@@ -238,15 +235,13 @@ public class ContactSwitchBlock extends SwitchBlock
       {
         Overlay.show(player,
           (Component.literal(""))
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity", ChatFormatting.BLUE, new Object[]{
-                Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity." + (high_sensitivity() ? "high":"normal"))
-              }))
+            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity", ChatFormatting.BLUE, Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity." + (high_sensitivity() ? "high":"normal"))))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_threshold", ChatFormatting.YELLOW, new Object[]{entity_count_threshold()}))
+            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_threshold", ChatFormatting.YELLOW, entity_count_threshold()))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_filter", ChatFormatting.DARK_GREEN, new Object[]{Component.translatable("rsgauges.switchconfig.touchcontactmat.entity_filter."+filter_class_names[filter_])}))
+            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_filter", ChatFormatting.DARK_GREEN, Component.translatable("rsgauges.switchconfig.touchcontactmat.entity_filter."+filter_class_names[filter_])))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.output_power", ChatFormatting.RED, new Object[]{setpower()}))
+            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.output_power", ChatFormatting.RED, setpower()))
         );
       }
       return true;

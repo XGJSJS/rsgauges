@@ -41,7 +41,7 @@ public class LinkSenderSwitchBlock extends SwitchBlock
   { return 0; }
 
   @Override
-  public void setPlacedBy(@NotNull Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
+  public void setPlacedBy(@NotNull Level world, @NotNull BlockPos pos, @NotNull BlockState state, @Nullable LivingEntity placer, @NotNull ItemStack stack)
   {
     final SwitchTileEntity te = getTe(world, pos);
     if(te != null) te.reset(world);
@@ -50,7 +50,7 @@ public class LinkSenderSwitchBlock extends SwitchBlock
   }
 
   @Override
-  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+  public void neighborChanged(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving)
   {
     if(!isAffectedByNeigbour(state, world, pos, fromPos)) return;
     final SwitchTileEntity te = getTe(world, pos);

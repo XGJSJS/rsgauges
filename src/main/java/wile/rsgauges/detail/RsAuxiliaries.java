@@ -13,8 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 
-public class RsAuxiliaries
-{
+public class RsAuxiliaries {
   // -------------------------------------------------------------------------------------------------------------------
   // Coorsys/AABB transformations,
   // -------------------------------------------------------------------------------------------------------------------

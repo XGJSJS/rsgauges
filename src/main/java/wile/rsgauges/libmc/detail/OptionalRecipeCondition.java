@@ -19,13 +19,11 @@ import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
-import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
 
 public class OptionalRecipeCondition implements ICondition
 {
@@ -44,7 +42,7 @@ public class OptionalRecipeCondition implements ICondition
   private static Predicate<Block> block_optouts = (block)->false;
   private static Predicate<Item> item_optouts = (item)->false;
 
-  public static void init(String modid, Logger logger)
+  public static void init(String modid)
   {
     NAME = new ResourceLocation(modid, "optional");
   }
@@ -59,7 +57,7 @@ public class OptionalRecipeCondition implements ICondition
     item_optouts = item_optout_provider;
   }
 
-  public OptionalRecipeCondition(ResourceLocation result, List<ResourceLocation> required, List<ResourceLocation> missing, List<ResourceLocation> required_tags, List<ResourceLocation> missing_tags, boolean isexperimental, boolean result_is_tag)
+  public OptionalRecipeCondition(@Nullable ResourceLocation result, List<ResourceLocation> required, List<ResourceLocation> missing, List<ResourceLocation> required_tags, List<ResourceLocation> missing_tags, boolean isexperimental, boolean result_is_tag)
   {
     all_required = required;
     any_missing = missing;

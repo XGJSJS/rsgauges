@@ -23,22 +23,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import wile.rsgauges.ModContent;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.detail.BlockCategories;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 
-
-public class ObserverSwitchBlock extends SwitchBlock
-{
+public class ObserverSwitchBlock extends SwitchBlock {
   public ObserverSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
 
@@ -47,7 +45,7 @@ public class ObserverSwitchBlock extends SwitchBlock
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
+  public @NotNull BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
   {
     if(!isAffectedByNeigbour(state, world, pos, facingPos)) return state;
     final ObserverSwitchTileEntity te = getTe(world, pos);
@@ -65,7 +63,7 @@ public class ObserverSwitchBlock extends SwitchBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new ObserverSwitchTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -86,11 +84,8 @@ public class ObserverSwitchBlock extends SwitchBlock
     private int update_timer_ = 0;
     private int debounce_counter_ = 0;
 
-    public ObserverSwitchTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
-    { super(te_type, pos, state); }
-
     public ObserverSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_OBSERVER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_observer_switch"), pos, state); }
 
     int debounce()
     { return debounce_; }
@@ -164,24 +159,11 @@ public class ObserverSwitchBlock extends SwitchBlock
             if (threshold() > range()) {
               threshold(range());
             }
-            break;
           }
-          case 2 -> {
-            threshold(threshold() + direction);
-            break;
-          }
-          case 3 -> {
-            debounce(debounce() + direction);
-            break;
-          }
-          case 4 -> {
-            setpower(setpower() + direction);
-            break;
-          }
-          case 5 -> {
-            filter(filter() + direction);
-            break;
-          }
+          case 2 -> threshold(threshold() + direction);
+          case 3 -> debounce(debounce() + direction);
+          case 4 -> setpower(setpower() + direction);
+          case 5 -> filter(filter() + direction);
         }
         if(threshold() < 1) threshold(1);
         if(setpower() < 1) setpower(1);
@@ -191,17 +173,17 @@ public class ObserverSwitchBlock extends SwitchBlock
       {
         ArrayList<Object> tr = new ArrayList<>();
         MutableComponent separator = (Component.literal(" | ")); separator.withStyle(ChatFormatting.GRAY);
-        tr.add(Auxiliaries.localizable("switchconfig.blocksensor.range", ChatFormatting.BLUE, new Object[]{range()}));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.threshold", ChatFormatting.YELLOW, new Object[]{threshold()})));
+        tr.add(Auxiliaries.localizable("switchconfig.blocksensor.range", ChatFormatting.BLUE, range()));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.threshold", ChatFormatting.YELLOW, threshold())));
         if(debounce()>0) {
-          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.lightsensor.debounce", ChatFormatting.AQUA, new Object[]{debounce()})));
+          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.lightsensor.debounce", ChatFormatting.AQUA, debounce())));
         } else {
           tr.add(Component.literal(""));
         }
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.output_power", ChatFormatting.RED, new Object[]{setpower()})));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.output_power", ChatFormatting.RED, setpower())));
         tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.filter",
           ChatFormatting.DARK_GREEN,
-          new Object[]{Component.translatable("rsgauges.switchconfig.blocksensor.filter."+filter_name())})
+                Component.translatable("rsgauges.switchconfig.blocksensor.filter."+filter_name()))
         ));
         Overlay.show(player, Auxiliaries.localizable("switchconfig.blocksensor", ChatFormatting.RESET, tr.toArray()));
       }
@@ -213,12 +195,11 @@ public class ObserverSwitchBlock extends SwitchBlock
 
     @Override
     @SuppressWarnings("deprecation")
-    public void tick()
-    {
+    public void tick() {
       if(level.isClientSide() || (--update_timer_ > 0)) return;
       update_timer_ = ((range_ <= 1) ? 20 : 10) + ((int)(Math.random()*3)); // Neighbours are fast updated using neighbourChanged notifications.
       final BlockState state = level.getBlockState(worldPosition);
-      if((state==null) || (!(state.getBlock() instanceof final ObserverSwitchBlock block))) return;
+      if(!(state.getBlock() instanceof final ObserverSwitchBlock block)) return;
       final Direction obervationDirection = state.getValue(FACING);
       int n_matched = 0;
       final int rng =  (range_ < 2) ? 1 : range_;
@@ -232,19 +213,16 @@ public class ObserverSwitchBlock extends SwitchBlock
         if(++n_matched >= tr) break;
       }
       boolean active = (n_matched >= threshold_);
-      if(debounce_ > 0) { // simple inline debouncing
-        if(active) {
+      if (debounce_ > 0) { // simple inline debouncing
+        if (active) {
           if(++debounce_counter_ < debounce_) return;
           debounce_counter_ = debounce_;
-          active = true;
         } else {
           if(--debounce_counter_ > 0) return;
           debounce_counter_ = 0;
-          active = false;
         }
       }
       if(state.getValue(POWERED) != active) block.onSwitchActivated(level, worldPosition, state, null, null);
     }
   }
-
 }

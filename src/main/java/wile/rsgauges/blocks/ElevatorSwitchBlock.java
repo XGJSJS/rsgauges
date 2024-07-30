@@ -22,19 +22,17 @@ import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
 
-
-public class ElevatorSwitchBlock extends PulseSwitchBlock
-{
+public class ElevatorSwitchBlock extends PulseSwitchBlock {
   public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
 
-  public ElevatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
-  {
+  public ElevatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound) {
     super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound);
     registerDefaultState(super.defaultBlockState().setValue(VARIANT, 0));
   }
 
-  public ElevatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { this(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
+  public ElevatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered) {
+    this(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null);
+  }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
@@ -46,17 +44,15 @@ public class ElevatorSwitchBlock extends PulseSwitchBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
-  {
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
     BlockState state = super.getStateForPlacement(context);
     if(state==null) return null;
     int variant = 0;
-    if(context.getClickedFace().getAxis().isHorizontal()) {
+    if (context.getClickedFace().getAxis().isHorizontal()) {
       int y = (int)Math.round(context.getClickLocation().subtract(Vec3.atCenterOf(context.getClickedPos())).scale(16).y());
       if(y >  4) variant = 2;
       if(y < -4) variant = 1;
     }
     return state.setValue(VARIANT, variant);
   }
-
 }

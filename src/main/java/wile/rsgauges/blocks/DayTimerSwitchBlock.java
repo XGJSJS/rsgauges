@@ -14,28 +14,24 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModContent;
 import wile.rsgauges.blocks.EnvironmentalSensorSwitchBlock.EnvironmentalSensorSwitchTileEntity;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 
-
-public class DayTimerSwitchBlock extends AutoSwitchBlock
-{
+public class DayTimerSwitchBlock extends AutoSwitchBlock {
   public DayTimerSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
-
-  public DayTimerSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
@@ -43,26 +39,20 @@ public class DayTimerSwitchBlock extends AutoSwitchBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new DayTimerSwitchTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Tile entity
   // -------------------------------------------------------------------------------------------------------------------
 
-  public static class DayTimerSwitchTileEntity extends EnvironmentalSensorSwitchTileEntity
-  {
-    public DayTimerSwitchTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
-    { super(te_type, pos, state); }
-
+  public static class DayTimerSwitchTileEntity extends EnvironmentalSensorSwitchTileEntity {
     public DayTimerSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_DAYTIMER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_daytimer_switch"), pos, state); }
 
     @Override
-    public boolean activation_config(BlockState state, @Nullable Player player, double x, double y, boolean show_only)
-    {
-      if(state == null) return false;
-      final SwitchBlock block = (SwitchBlock)state.getBlock();
+    public boolean activation_config(BlockState state, @Nullable Player player, double x, double y, boolean show_only) {
+      if (state == null) return false;
       final int direction = (y >= 13) ? (1) : ((y <= 2) ? (-1) : (0));
       final int field = ((x>=2) && (x<=3.95)) ? (1) : ( ((x>=4.25) && (x<=7)) ? (2) : ( ((x>=8) && (x<=10)) ? (3) : ( ((x>=11) && (x<=13)) ? (4) : (0) )));
       if((direction==0) || (field==0)) return false;
@@ -74,39 +64,31 @@ public class DayTimerSwitchBlock extends AutoSwitchBlock
             if (v < 0) v += 15.0;
             else if (v > 15) v = 0;
             threshold0_on(v);
-            break;
           }
           case 2 -> {
             double v = threshold0_off() + (time_scaling * direction);
             if (v < 0) v += 15.0;
             else if (v > 15) v = 0;
             threshold0_off(v);
-            break;
           }
-          case 3 -> {
-            debounce(debounce() + direction);
-            break;
-          }
-          case 4 -> {
-            setpower(setpower() + direction);
-            break;
-          }
+          case 3 -> debounce(debounce() + direction);
+          case 4 -> setpower(setpower() + direction);
         }
-        if(setpower() < 1) setpower(1);
+        if (setpower() < 1) setpower(1);
         setChanged();
       }
       {
         MutableComponent separator = (Component.literal(" | ")); separator.withStyle(ChatFormatting.GRAY);
         ArrayList<Object> tr = new ArrayList<>();
-        tr.add(Auxiliaries.localizable("switchconfig.daytimerclock.daytime_on", ChatFormatting.BLUE, new Object[]{RsAuxiliaries.daytimeToString((long)(threshold0_on()*24000.0/15.0))}));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.daytime_off", ChatFormatting.YELLOW, new Object[]{RsAuxiliaries.daytimeToString((long)(threshold0_off()*24000.0/15.0))})));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.output_power", ChatFormatting.RED, new Object[]{setpower()})));
+        tr.add(Auxiliaries.localizable("switchconfig.daytimerclock.daytime_on", ChatFormatting.BLUE, RsAuxiliaries.daytimeToString((long)(threshold0_on()*24000.0/15.0))));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.daytime_off", ChatFormatting.YELLOW, RsAuxiliaries.daytimeToString((long)(threshold0_off()*24000.0/15.0)))));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.output_power", ChatFormatting.RED, setpower())));
         if(debounce()>0) {
-          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.random", ChatFormatting.DARK_GREEN, new Object[]{debounce()}) ));
+          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.random", ChatFormatting.DARK_GREEN, debounce()) ));
         } else {
           tr.add(Component.literal(""));
         }
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.output_power", ChatFormatting.RED, new Object[]{setpower()})));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.output_power", ChatFormatting.RED, setpower())));
         Overlay.show(player, Auxiliaries.localizable("switchconfig.daytimerclock", ChatFormatting.RESET, tr.toArray()));
       }
       return true;

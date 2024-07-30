@@ -22,10 +22,8 @@ import wile.rsgauges.ModRsGauges;
 import wile.rsgauges.libmc.detail.Registries;
 import wile.rsgauges.libmc.detail.SidedProxy;
 
-public class ModResources
-{
-  public static RegistryObject<SoundEvent> createSoundEvent(String name)
-  {
+public class ModResources {
+  public static RegistryObject<SoundEvent> createSoundEvent(String name) {
     return Registries.sound_deferred_register.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ModRsGauges.MODID, name)));
   }
 
@@ -39,8 +37,7 @@ public class ModResources
    * playback parameters for the sound.
    */
   @SuppressWarnings("unused")
-  public static final class BlockSoundEvent
-  {
+  public static final class BlockSoundEvent {
     final SoundEvent se_;
     final float volume_, pitch_;
     public BlockSoundEvent(SoundEvent se, float volume, float pitch) { se_=se; volume_=volume; pitch_=pitch; }
@@ -51,13 +48,13 @@ public class ModResources
     public float pitch() { return pitch_; }
 
     public void play(Level world, BlockPos pos) {
-      if(!(world instanceof ServerLevel)) {
+      if (!(world instanceof ServerLevel)) {
         world.playSound(SidedProxy.getPlayerClientSide(), pos, se_, SoundSource.BLOCKS, volume_, pitch_);
       } else {
         float volume = Math.min(volume_, 1f);
         world.playSound(null, pos, se_, SoundSource.BLOCKS, volume, pitch_);
-        if(volume_ > 1.1f) {
-          for(Direction dir: Direction.values()) {
+        if (volume_ > 1.1f) {
+          for (Direction dir: Direction.values()) {
             world.playSound(null, pos.relative(dir, 15), se_, SoundSource.BLOCKS, volume, pitch_);
           }
         }
@@ -65,8 +62,7 @@ public class ModResources
     }
   }
 
-  public static final class BlockSoundEvents
-  {
+  public static final class BlockSoundEvents {
     // Switch default sounds
     public static final BlockSoundEvent DEFAULT_SWITCH_MUTE          = new ModResources.BlockSoundEvent(SoundEvents.LEVER_CLICK, 0f, 1f);
     public static final BlockSoundEvent DEFAULT_SWITCH_ACTIVATION    = new ModResources.BlockSoundEvent(SoundEvents.LEVER_CLICK, 0.3f, 0.92f);

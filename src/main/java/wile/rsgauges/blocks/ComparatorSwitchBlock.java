@@ -25,32 +25,28 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModConfig;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.blocks.EnvironmentalSensorSwitchBlock.EnvironmentalSensorSwitchTileEntity;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class ComparatorSwitchBlock extends AutoSwitchBlock
-{
+public class ComparatorSwitchBlock extends AutoSwitchBlock {
   public ComparatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
-
-  public ComparatorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
-  {
+  public void neighborChanged(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving) {
     if(!isAffectedByNeigbour(state, world, pos, fromPos)) return;
     final SwitchTileEntity te = getTe(world, pos);
     if(!(te instanceof ComparatorSwitchTileEntity)) return;
@@ -58,9 +54,9 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
   }
 
   @Override
-  @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-  { return new ComparatorSwitchTileEntity(pos, state); }
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
+    return new ComparatorSwitchTileEntity(pos, state);
+  }
 
   @Override
   public Optional<Integer> switchLinkOutputPower(Level world, BlockPos pos)
@@ -74,21 +70,18 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
   // Tile entity
   // -------------------------------------------------------------------------------------------------------------------
 
-  public static class ComparatorSwitchTileEntity extends EnvironmentalSensorSwitchTileEntity
-  {
+  public static class ComparatorSwitchTileEntity extends EnvironmentalSensorSwitchTileEntity {
     private int link_output_power_ = 0;
     public int link_output_power() { return link_output_power_; }
 
     public ComparatorSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_COMPARATOR_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_comparator_switch"), pos, state); }
 
     private interface Acquisition { int sample(Level world, BlockPos pos, BlockState state, Direction side); }
 
-    private static final Acquisition acquisitions[] = {
+    private static final Acquisition[] acquisitions = {
       // 0: Comparator input override
-      (world, pos, state, side) -> {
-        return (!state.hasAnalogOutputSignal()) ? (-1) : (state.getAnalogOutputSignal(world, pos));
-      },
+      (world, pos, state, side) -> (!state.hasAnalogOutputSignal()) ? (-1) : (state.getAnalogOutputSignal(world, pos)),
       // 1: Used inventory slots
       (world, pos, state, side) -> {
         final BlockEntity te = world.getBlockEntity(pos);
@@ -101,8 +94,7 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
           return (int)Math.round(((double)n*15)/(double)size);
         } else {
           final IItemHandler handler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
-          if(handler == null) return -1;
-          final int size = handler.getSlots();
+            final int size = handler.getSlots();
           if(size == 0) return 0;
           int n = 0;
           for(int i=0; i<size; ++i) n += handler.getStackInSlot(i).isEmpty() ? 0 : 1;
@@ -121,8 +113,7 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
           return (int)Math.round(((double)n*15)/(double)size);
         } else {
           final IItemHandler handler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
-          if(handler == null) return -1;
-          final int size = handler.getSlots();
+            final int size = handler.getSlots();
           if(size == 0) return 0;
           int n = 0;
           for(int i=0; i<size; ++i) n += handler.getStackInSlot(i).isEmpty() ? 1 : 0;
@@ -130,9 +121,7 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
         }
       },
       // 3: Redstone signal
-      (world, pos, state, side) -> {
-        return world.getSignal(pos, side);
-      }
+      (world, pos, state, side) -> world.getSignal(pos, side)
     };
 
     private int acquisition_mode()
@@ -145,8 +134,7 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
     { if(update_timer_ > 1) update_timer_ = 1; }
 
     @Override
-    public void reset(LevelReader world)
-    {
+    public void reset(LevelReader world) {
       super.reset(world);
       setpower(15);
       threshold0_on(1);
@@ -155,10 +143,8 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
     }
 
     @Override
-    public boolean activation_config(BlockState state, @Nullable Player player, double x, double y, boolean show_only)
-    {
-      if(state == null) return false;
-      final SwitchBlock block = (SwitchBlock)state.getBlock();
+    public boolean activation_config(BlockState state, @Nullable Player player, double x, double y, boolean show_only) {
+      if (state == null) return false;
       final int direction = (y >= 9) ? (1) : ((y <= 6) ? (-1) : (0));
       final int field = ((x>=2) && (x<=3.95)) ? (1) : (
         ((x>=4.25) && (x<=7)) ? (2) : (
@@ -174,7 +160,6 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
             else if (v > 15) v = 15;
             threshold0_on(v);
             if (threshold0_on() < threshold0_off()) threshold0_off(threshold0_on());
-            break;
           }
           case 2 -> {
             double v = threshold0_off() + (direction);
@@ -182,16 +167,9 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
             else if (v > 14) v = 14;
             threshold0_off(v);
             if (threshold0_off() > threshold0_on()) threshold0_on(threshold0_off());
-            break;
           }
-          case 3 -> {
-            acquisition_mode(acquisition_mode() + direction);
-            break;
-          }
-          case 4 -> {
-            setpower(setpower() + direction);
-            break;
-          }
+          case 3 -> acquisition_mode(acquisition_mode() + direction);
+          case 4 -> setpower(setpower() + direction);
         }
         if(setpower() < 1) setpower(1);
         setChanged();
@@ -199,23 +177,23 @@ public class ComparatorSwitchBlock extends AutoSwitchBlock
       {
         MutableComponent separator = (Component.literal(" | ")); separator.withStyle(ChatFormatting.GRAY);
         ArrayList<Object> tr = new ArrayList<>();
-        tr.add(Auxiliaries.localizable("switchconfig.comparator_switch.threshold_on", ChatFormatting.BLUE, new Object[]{(int)threshold0_on()}));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.threshold_off", ChatFormatting.YELLOW, new Object[]{(int)threshold0_off()})));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.output_power", ChatFormatting.RED, new Object[]{(int) setpower()})));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.mode"+((int)acquisition_mode()), ChatFormatting.DARK_GREEN, new Object[]{})));
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.output_power", ChatFormatting.RED, new Object[]{(int) setpower()})));
+        tr.add(Auxiliaries.localizable("switchconfig.comparator_switch.threshold_on", ChatFormatting.BLUE, (int)threshold0_on()));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.threshold_off", ChatFormatting.YELLOW, (int)threshold0_off())));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.output_power", ChatFormatting.RED, (int) setpower())));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.mode"+ acquisition_mode(), ChatFormatting.DARK_GREEN)));
+        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.comparator_switch.output_power", ChatFormatting.RED, (int) setpower())));
         Overlay.show(player, Auxiliaries.localizable("switchconfig.comparator_switch", ChatFormatting.RESET, tr.toArray()));
       }
       return true;
     }
 
     @Override
-    public int power(BlockState state, boolean strong)
-    { return (acquisition_mode()==3) ? (0) : (super.power(state, strong)); }
+    public int power(BlockState state, boolean strong) {
+      return (acquisition_mode()==3) ? (0) : (super.power(state, strong));
+    }
 
     @Override
-    public void tick()
-    {
+    public void tick() {
       if((!hasLevel()) || (getLevel().isClientSide()) || (--update_timer_ > 0)) return;
       update_timer_ = Mth.clamp(ModConfig.comparator_switch_update_interval, 1, 10);
       BlockState state = getBlockState();

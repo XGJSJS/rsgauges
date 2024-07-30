@@ -24,30 +24,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModConfig;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-
-public class EntityDetectorSwitchBlock extends AutoSwitchBlock
-{
+public class EntityDetectorSwitchBlock extends AutoSwitchBlock {
   public EntityDetectorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
-
-  public EntityDetectorSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
@@ -55,7 +50,7 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new DetectorSwitchTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -67,8 +62,8 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
    */
   public static class DetectorSwitchTileEntity extends AutoSwitchTileEntity
   {
-    public static final Class<?> filter_classes[] = { LivingEntity.class, Player.class, Monster.class, Animal.class, Villager.class, ItemEntity.class, Entity.class };
-    public static final String filter_class_names[] = { "creatures", "players", "mobs", "animals", "villagers", "objects", "everything" };
+    public static final Class<?>[] filter_classes = { LivingEntity.class, Player.class, Monster.class, Animal.class, Villager.class, ItemEntity.class, Entity.class };
+    public static final String[] filter_class_names = { "creatures", "players", "mobs", "animals", "villagers", "objects", "everything" };
     private static final int max_sensor_range_ = 16;
     private int sensor_entity_count_threshold_ = 1;
     private int sensor_range_ = 5;
@@ -77,11 +72,8 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
     private int update_interval_ = 8;
     private int update_timer_ = 0;
 
-    public DetectorSwitchTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
-    { super(te_type, pos, state); }
-
     public DetectorSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_DETECTOR_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_detector_switch"), pos, state); }
 
     public int filter()
     { return filter_; }
@@ -142,20 +134,12 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
           case 1 -> {
             sensor_range(sensor_range() + direction);
             area_ = null;
-            break;
           }
-          case 2 -> {
-            sensor_entity_threshold(sensor_entity_threshold() + direction);
-            break;
-          }
-          case 3 -> {
-            filter(filter() + direction);
-            break;
-          }
+          case 2 -> sensor_entity_threshold(sensor_entity_threshold() + direction);
+          case 3 -> filter(filter() + direction);
           case 4 -> {
             setpower(setpower() + direction);
             if (setpower() < 1) setpower(1);
-            break;
           }
         }
         setChanged();
@@ -163,13 +147,13 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
       {
         Overlay.show(player,
           (Component.literal(""))
-            .append(Auxiliaries.localizable("switchconfig.detector.sensor_range", ChatFormatting.BLUE, new Object[]{sensor_range()}))
+            .append(Auxiliaries.localizable("switchconfig.detector.sensor_range", ChatFormatting.BLUE, sensor_range()))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.detector.entity_threshold", ChatFormatting.YELLOW, new Object[]{sensor_entity_threshold()}))
+            .append(Auxiliaries.localizable("switchconfig.detector.entity_threshold", ChatFormatting.YELLOW, sensor_entity_threshold()))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.detector.entity_filter", ChatFormatting.DARK_GREEN, new Object[]{Component.translatable("rsgauges.switchconfig.detector.entity_filter."+filter_class_names[filter()])}))
+            .append(Auxiliaries.localizable("switchconfig.detector.entity_filter", ChatFormatting.DARK_GREEN, Component.translatable("rsgauges.switchconfig.detector.entity_filter."+filter_class_names[filter()])))
             .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.detector.output_power", ChatFormatting.RED, new Object[]{setpower()}))
+            .append(Auxiliaries.localizable("switchconfig.detector.output_power", ChatFormatting.RED, setpower()))
         );
       }
       return true;
@@ -181,7 +165,7 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
       if((level.isClientSide()) || (--update_timer_ > 0)) return;
       update_timer_ = update_interval_;
       BlockState state = level.getBlockState(getBlockPos());
-      if((state==null) || (!(state.getBlock() instanceof AutoSwitchBlock))) return;
+      if(!(state.getBlock() instanceof AutoSwitchBlock)) return;
       AutoSwitchBlock block = (AutoSwitchBlock)(state.getBlock());
       // initialisations
       if(update_interval_ == 0) {
@@ -250,5 +234,4 @@ public class EntityDetectorSwitchBlock extends AutoSwitchBlock
       updateSwitchState(state, block, active, configured_on_time());
     }
   }
-
 }

@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,7 +40,6 @@ import wile.rsgauges.libmc.detail.ColorUtils;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-
 public class SensitiveGlassBlock extends RsBlock
 {
   public static final BooleanProperty POWERED = BooleanProperty.create("powered");
@@ -57,7 +55,7 @@ public class SensitiveGlassBlock extends RsBlock
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return null; }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -67,24 +65,20 @@ public class SensitiveGlassBlock extends RsBlock
   // Light reduction
   @OnlyIn(Dist.CLIENT)
   @SuppressWarnings("deprecation")
-  public float getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos)
+  public float getShadeBrightness(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos)
   { return 0.95f; }
-
-  @Override
-  public RenderTypeHint getRenderTypeHint()
-  { return RenderTypeHint.TRANSLUCENT; }
 
   @Override
   @OnlyIn(Dist.CLIENT)
   @SuppressWarnings("deprecation")
-  public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side)
+  public boolean skipRendering(@NotNull BlockState state, BlockState adjacentBlockState, @NotNull Direction side)
   {
     if((!(adjacentBlockState.getBlock() instanceof SensitiveGlassBlock))) return false;
     return (adjacentBlockState.getValue(POWERED) == state.getValue(POWERED));
   }
 
   @Override
-  public boolean isPossibleToRespawnInThis(BlockState state) {
+  public boolean isPossibleToRespawnInThis(@NotNull BlockState state) {
     return false;
   }
 
@@ -94,11 +88,11 @@ public class SensitiveGlassBlock extends RsBlock
   }
 
   @Override
-  protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+  protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder)
   { super.createBlockStateDefinition(builder); builder.add(POWERED, COLOR); }
 
   @Override
-  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random)
+  public void tick(@NotNull BlockState state, ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource random)
   {
     if(world.isClientSide()) return;
     if(state.getValue(POWERED) && (!(world.hasNeighborSignal(pos)))) {
@@ -107,7 +101,7 @@ public class SensitiveGlassBlock extends RsBlock
   }
 
   @Override
-  public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos)
+  public boolean propagatesSkylightDown(@NotNull BlockState state, @NotNull BlockGetter reader, @NotNull BlockPos pos)
   { return true; }
 
   @Override
@@ -118,7 +112,7 @@ public class SensitiveGlassBlock extends RsBlock
   }
 
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
   {
     final ItemStack stack = player.getItemInHand(hand);
     Optional<DyeColor> dye = ColorUtils.getColorFromDyeItem(stack);
@@ -128,17 +122,16 @@ public class SensitiveGlassBlock extends RsBlock
   }
 
   @Override
-  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+  public void neighborChanged(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving)
   {
     if(world.isClientSide()) return;
     final boolean was_powered = state.getValue(POWERED);
     final boolean powered = world.hasNeighborSignal(pos);
     if(was_powered == powered) return;
-    if(powered) {
-      world.setBlock(pos, state.setValue(POWERED, powered), 1|2);
+    if (powered) {
+      world.setBlock(pos, state.setValue(POWERED, true), 1|2);
     } else {
       world.scheduleTick(pos, this, 4);
     }
   }
-
 }

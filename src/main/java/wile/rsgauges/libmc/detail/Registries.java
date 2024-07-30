@@ -22,9 +22,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -55,9 +53,8 @@ public class Registries {
   private static final Map<String, RegistryObject<EntityType<?>>> registered_entity_types = new HashMap<>();
   private static final Map<String, RegistryObject<MenuType<?>>> registered_menu_types = new HashMap<>();
   private static final Map<String, TagKey<Block>> registered_block_tag_keys = new HashMap<>();
-  private static final Map<String, TagKey<Item>> registered_item_tag_keys = new HashMap<>();
   private static final ArrayList<Pair<Class<?>, RegistryObject<Block>>> registered_block_classes = new ArrayList<>();
-  public static final HashSet<Supplier<? extends ItemLike>> TAB_ITEMS = new HashSet<>();
+  public static final List<Supplier<? extends ItemLike>> TAB_ITEMS = new LinkedList<>();
 
   public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TAB.register("industrial_small_lever", () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.tabrsgauges")).icon(() -> new ItemStack(registered_items.get(creative_tab_icon).get())).build());
 
@@ -66,11 +63,13 @@ public class Registries {
 
   // -------------------------------------------------------------------------------------------------------------
 
-  public static Block getBlock(String block_name)
-  { return registered_blocks.get(block_name).get(); }
+  public static Block getBlock(String block_name) {
+    return registered_blocks.get(block_name).get();
+  }
 
-  public static Item getItem(String name)
-  { return registered_items.get(name).get(); }
+  public static Item getItem(String name) {
+    return registered_items.get(name).get();
+  }
 
   public static EntityType<?> getEntityType(String name)
   { return registered_entity_types.get(name).get(); }
@@ -81,18 +80,6 @@ public class Registries {
   public static MenuType<?> getMenuType(String name)
   { return registered_menu_types.get(name).get(); }
 
-  public static BlockEntityType<?> getBlockEntityTypeOfBlock(String block_name)
-  { return getBlockEntityType("tet_"+block_name); }
-
-  public static MenuType<?> getMenuTypeOfBlock(String name)
-  { return getMenuType("ct_"+name); }
-
-  public static TagKey<Block> getBlockTagKey(String name)
-  { return registered_block_tag_keys.get(name); }
-
-  public static TagKey<Item> getItemTagKey(String name)
-  { return registered_item_tag_keys.get(name); }
-
   // -------------------------------------------------------------------------------------------------------------
 
   @Nonnull
@@ -102,14 +89,6 @@ public class Registries {
   @Nonnull
   public static List<Item> getRegisteredItems()
   { return registered_items.values().stream().map(RegistryObject::get).collect(Collectors.toList()); }
-
-  @Nonnull
-  public static List<BlockEntityType<?>> getRegisteredBlockEntityTypes()
-  { return registered_block_entity_types.values().stream().map(RegistryObject::get).collect(Collectors.toList()); }
-
-  @Nonnull
-  public static List<EntityType<?>> getRegisteredEntityTypes()
-  { return registered_entity_types.values().stream().map(RegistryObject::get).collect(Collectors.toList()); }
 
   // -------------------------------------------------------------------------------------------------------------
 
@@ -130,19 +109,6 @@ public class Registries {
     registered_block_classes.add(Pair.of(clazz, block));
   }
 
-  public static <T extends BlockEntity> void addBlockEntityType(String registry_name, BlockEntityType.BlockEntitySupplier<T> ctor, String... block_names)
-  {
-    ArrayList<RegistryObject<Block>> blocks = new ArrayList<>();
-    for (String str : block_names)
-    {
-      blocks.add(registered_blocks.get(str));
-    }
-
-    RegistryObject<BlockEntityType<?>> blockEntityType = block_entity_deferred_register.register(registry_name,
-            () -> BlockEntityType.Builder.of(ctor, blocks.stream().map(RegistryObject::get).toList().toArray(new Block[]{})).build(null));
-    registered_block_entity_types.put(registry_name, blockEntityType);
-  }
-
   public static <T extends BlockEntity> void addBlockEntityType(String registry_name, BlockEntityType.BlockEntitySupplier<T> ctor, Class<? extends Block> block_clazz)
   {
     ArrayList<RegistryObject<Block>> blocks = new ArrayList<>();
@@ -154,31 +120,6 @@ public class Registries {
     RegistryObject<BlockEntityType<?>> blockEntityType = block_entity_deferred_register.register(registry_name,
             () -> BlockEntityType.Builder.of(ctor, blocks.stream().map(RegistryObject::get).toList().toArray(new Block[]{})).build(null));
     registered_block_entity_types.put(registry_name, blockEntityType);
-  }
-
-  public static void addEntityType(String registry_name, Supplier<EntityType<?>> supplier)
-  {
-    RegistryObject<EntityType<?>> entityType = entity_deferred_register.register(registry_name, supplier);
-    registered_entity_types.put(registry_name, entityType);
-  }
-
-  public static void addMenuType(String registry_name, IContainerFactory<?> supplier)
-  {
-    RegistryObject<MenuType<?>> menuType = menu_deferred_register.register(registry_name, () -> IForgeMenuType.create(supplier));
-    registered_menu_types.put(registry_name, menuType);
-  }
-
-  public static void addBlock(String registry_name, Supplier<? extends Block> block_supplier, BlockEntityType.BlockEntitySupplier<?> block_entity_ctor, Class<?> clazz)
-  {
-    addBlock(registry_name, block_supplier, clazz);
-    addBlockEntityType("tet_"+registry_name, block_entity_ctor, registry_name);
-  }
-
-  public static void addBlock(String registry_name, Supplier<? extends Block> block_supplier, BlockEntityType.BlockEntitySupplier<?> block_entity_ctor, MenuType.MenuSupplier<?> menu_type_supplier, Class<?> clazz)
-  {
-    addBlock(registry_name, block_supplier, clazz);
-    addBlockEntityType("tet_"+registry_name, block_entity_ctor, registry_name);
-    //addMenuType("ct_"+registry_name, menu_type_supplier);
   }
 
   public static void addOptionalBlockTag(String tag_name, ResourceLocation... default_blocks)
@@ -194,16 +135,7 @@ public class Registries {
     addOptionalBlockTag(tag_name, Arrays.stream(default_blocks).map(ResourceLocation::new).toList().toArray(new ResourceLocation[]{}));
   }
 
-  public static void addOptionaItemTag(String tag_name, ResourceLocation... default_items)
-  {
-    final Set<Supplier<Item>> default_suppliers = new HashSet<>();
-    for(ResourceLocation rl: default_items) default_suppliers.add(()->ForgeRegistries.ITEMS.getValue(rl));
-    final TagKey<Item> key = ForgeRegistries.ITEMS.tags().createOptionalTagKey(new ResourceLocation(modid, tag_name), default_suppliers);
-    registered_item_tag_keys.put(tag_name, key);
-  }
-
-  public static void registerAll(IEventBus eventBus)
-  {
+  public static void registerAll(IEventBus eventBus) {
     ModResources.ALARM_SIREN_SOUND = ModResources.createSoundEvent("alarm_siren_sound");
 
     block_deferred_register.register(eventBus);

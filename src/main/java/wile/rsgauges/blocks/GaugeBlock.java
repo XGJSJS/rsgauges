@@ -28,9 +28,7 @@ import wile.rsgauges.detail.ModResources;
 
 import javax.annotation.Nullable;
 
-
-public class GaugeBlock extends AbstractGaugeBlock
-{
+public class GaugeBlock extends AbstractGaugeBlock {
   public static final IntegerProperty POWER = IntegerProperty.create("power", 0, 15);
 
   public GaugeBlock(long config, BlockBehaviour.Properties props, final AABB aabb, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
@@ -41,8 +39,7 @@ public class GaugeBlock extends AbstractGaugeBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
-  {
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
     final BlockState state = super.getStateForPlacement(context);
     return (state==null) ? null : state.setValue(POWER, 0);
   }

@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.util.FakePlayer;
@@ -27,9 +26,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-
-public class Networking
-{
+public class Networking {
   private static final String PROTOCOL = "1";
   private static SimpleChannel DEFAULT_CHANNEL;
 
@@ -51,31 +48,18 @@ public class Networking
   // Tile entity notifications
   //--------------------------------------------------------------------------------------------------------------------
 
-  public interface IPacketTileNotifyReceiver
-  {
+  public interface IPacketTileNotifyReceiver {
     default void onServerPacketReceived(CompoundTag nbt) {}
     default void onClientPacketReceived(Player player, CompoundTag nbt) {}
   }
 
-  public static class PacketTileNotifyClientToServer
-  {
-    CompoundTag nbt = null;
-    BlockPos pos = BlockPos.ZERO;
+  public static class PacketTileNotifyClientToServer {
+    CompoundTag nbt;
+    BlockPos pos;
 
-    public static void sendToServer(BlockPos pos, CompoundTag nbt)
-    { if((pos!=null) && (nbt!=null)) DEFAULT_CHANNEL.sendToServer(new PacketTileNotifyClientToServer(pos, nbt)); }
-
-    public static void sendToServer(BlockEntity te, CompoundTag nbt)
-    { if((te!=null) && (nbt!=null)) DEFAULT_CHANNEL.sendToServer(new PacketTileNotifyClientToServer(te, nbt)); }
-
-    public PacketTileNotifyClientToServer()
-    {}
-
-    public PacketTileNotifyClientToServer(BlockPos pos, CompoundTag nbt)
-    { this.nbt = nbt; this.pos = pos; }
-
-    public PacketTileNotifyClientToServer(BlockEntity te, CompoundTag nbt)
-    { this.nbt = nbt; pos = te.getBlockPos(); }
+    public PacketTileNotifyClientToServer(BlockPos pos, CompoundTag nbt) {
+      this.nbt = nbt; this.pos = pos;
+    }
 
     public static PacketTileNotifyClientToServer parse(final FriendlyByteBuf buf)
     { return new PacketTileNotifyClientToServer(buf.readBlockPos(), buf.readNbt()); }
@@ -100,8 +84,7 @@ public class Networking
     }
   }
 
-  public static class PacketTileNotifyServerToClient
-  {
+  public static class PacketTileNotifyServerToClient {
     CompoundTag nbt = null;
     BlockPos pos = BlockPos.ZERO;
 
@@ -116,9 +99,6 @@ public class Networking
       if(te==null || te.getLevel()==null) return;
       for(Player player: te.getLevel().players()) sendToPlayer(player, te, nbt);
     }
-
-    public PacketTileNotifyServerToClient()
-    {}
 
     public PacketTileNotifyServerToClient(BlockPos pos, CompoundTag nbt)
     { this.nbt=nbt; this.pos=pos; }
@@ -161,17 +141,8 @@ public class Networking
 
   public static class PacketContainerSyncClientToServer
   {
-    int id = -1;
-    CompoundTag nbt = null;
-
-    public static void sendToServer(int windowId, CompoundTag nbt)
-    { if(nbt!=null) DEFAULT_CHANNEL.sendToServer(new PacketContainerSyncClientToServer(windowId, nbt)); }
-
-    public static void sendToServer(AbstractContainerMenu container, CompoundTag nbt)
-    { if(nbt!=null) DEFAULT_CHANNEL.sendToServer(new PacketContainerSyncClientToServer(container.containerId, nbt)); }
-
-    public PacketContainerSyncClientToServer()
-    {}
+    int id;
+    CompoundTag nbt;
 
     public PacketContainerSyncClientToServer(int id, CompoundTag nbt)
     { this.nbt = nbt; this.id = id; }
@@ -199,32 +170,8 @@ public class Networking
 
   public static class PacketContainerSyncServerToClient
   {
-    int id = -1;
-    CompoundTag nbt = null;
-
-    public static void sendToPlayer(Player player, int windowId, CompoundTag nbt)
-    {
-      if((!(player instanceof ServerPlayer)) || (player instanceof FakePlayer) || (nbt==null)) return;
-      DEFAULT_CHANNEL.sendTo(new PacketContainerSyncServerToClient(windowId, nbt), ((ServerPlayer)player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-    }
-
-    public static void sendToPlayer(Player player, AbstractContainerMenu container, CompoundTag nbt)
-    {
-      if((!(player instanceof ServerPlayer)) || (player instanceof FakePlayer) || (nbt==null)) return;
-      DEFAULT_CHANNEL.sendTo(new PacketContainerSyncServerToClient(container.containerId, nbt), ((ServerPlayer)player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-    }
-
-    public static <C extends AbstractContainerMenu & INetworkSynchronisableContainer>
-    void sendToListeners(Level world, C container, CompoundTag nbt)
-    {
-      for(Player player: world.players()) {
-        if(player.containerMenu.containerId != container.containerId) continue;
-        sendToPlayer(player, container.containerId, nbt);
-      }
-    }
-
-    public PacketContainerSyncServerToClient()
-    {}
+    int id;
+    CompoundTag nbt;
 
     public PacketContainerSyncServerToClient(int id, CompoundTag nbt)
     { this.nbt=nbt; this.id=id; }
@@ -272,9 +219,6 @@ public class Networking
       DEFAULT_CHANNEL.sendTo(new OverlayTextMessage(message, delay), ((ServerPlayer)player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
-    public OverlayTextMessage()
-    { data_ = Component.translatable("[unset]"); }
-
     public OverlayTextMessage(final Component tct, int delay)
     { data_ = tct.copy(); delay_ = delay; }
 
@@ -283,7 +227,7 @@ public class Networking
       try {
         return new OverlayTextMessage(buf.readComponent(), DISPLAY_TIME_MS);
       } catch(Throwable e) {
-        return new OverlayTextMessage(Component.translatable("[incorrect translation]"), DISPLAY_TIME_MS);
+        return new OverlayTextMessage(Component.literal("[incorrect translation]"), DISPLAY_TIME_MS);
       }
     }
 
@@ -292,7 +236,7 @@ public class Networking
       try {
         buf.writeComponent(pkt.data());
       } catch(Throwable e) {
-        Auxiliaries.logger().error("OverlayTextMessage.toBytes() failed: " + e);
+          Auxiliaries.logger().error("OverlayTextMessage.toBytes() failed: {}", e.getMessage());
       }
     }
 

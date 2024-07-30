@@ -44,7 +44,6 @@ import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -63,9 +62,7 @@ import java.util.List;
 
 public abstract class RsBlock extends Block implements EntityBlock
 {
-  public static final long RSBLOCK_CONFIG_SOLID              = 0x0000000000000000L;
   public static final long RSBLOCK_CONFIG_CUTOUT             = 0x1000000000000000L;
-  public static final long RSBLOCK_CONFIG_CUTOUT_MIPPED      = 0x2000000000000000L;
   public static final long RSBLOCK_CONFIG_TRANSLUCENT        = 0x3000000000000000L;
   public static final long RSBLOCK_NOT_WATERLOGGABLE         = 0x0008000000000000L;
   public enum RenderTypeHint { SOLID,CUTOUT,CUTOUT_MIPPED,TRANSLUCENT }
@@ -86,9 +83,6 @@ public abstract class RsBlock extends Block implements EntityBlock
   public RsBlock(long config, BlockBehaviour.Properties properties, final VoxelShape vshape)
   { super(properties); this.config = config; registerDefaultState(this.getStateDefinition().any().setValue(WATERLOGGED, false)); }
 
-  public RenderTypeHint getRenderTypeHint()
-  { return render_layer_map_[(int)((config>>60)&0x3)]; }
-
   @Override
   @Nullable
   public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NotNull BlockState state, @NotNull BlockEntityType<T> te_type)
@@ -106,12 +100,7 @@ public abstract class RsBlock extends Block implements EntityBlock
   @Override
   @OnlyIn(Dist.CLIENT)
   public void appendHoverText(final @NotNull ItemStack stack, @Nullable BlockGetter world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag)
-  { Auxiliaries.Tooltip.addInformation(stack, world, tooltip, flag, true); }
-
-  @OnlyIn(Dist.CLIENT)
-  @SuppressWarnings("deprecation")
-  public boolean hasCustomBreakingProgress(BlockState state)
-  { return true; }
+  { Auxiliaries.Tooltip.addInformation(stack, tooltip, true); }
 
   @Override
   @SuppressWarnings("deprecation")
@@ -213,44 +202,34 @@ public abstract class RsBlock extends Block implements EntityBlock
   /**
    * Main RsBlock derivate tile entity base
    */
-  public static abstract class RsTileEntity extends BlockEntity implements Networking.IPacketTileNotifyReceiver
-  {
-    private static final int NBT_ENTITY_TYPE = 1; // forge-doc: use 1, does not matter, only used by vanilla.
+  public static abstract class RsTileEntity extends BlockEntity implements Networking.IPacketTileNotifyReceiver {
 
     public RsTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
     { super(te_type, pos, state); }
 
-    public void write(CompoundTag nbt, boolean updatePacket)
-    {}
+    public void write(CompoundTag nbt, boolean updatePacket) {}
 
-    public void read(CompoundTag nbt, boolean updatePacket)
-    {}
+    public void read(CompoundTag nbt, boolean updatePacket) {}
 
-    public void tick()
-    {}
+    public void tick() {}
 
-    protected final void syncToClients()
-    {
-      if(level.isClientSide()) return;
-      CompoundTag nbt = new CompoundTag();
-      write(nbt, true);
-      Networking.PacketTileNotifyServerToClient.sendToPlayers(this, nbt);
+    public final void onServerPacketReceived(CompoundTag nbt) {
+      read(nbt, true);
     }
-
-    public final void onServerPacketReceived(CompoundTag nbt)
-    { read(nbt, true); }
 
     // --------------------------------------------------------------------------------------------------------
     // BlockEntity
     // --------------------------------------------------------------------------------------------------------
 
     @Override
-    public final void saveAdditional(@NotNull CompoundTag nbt)
-    { super.saveAdditional(nbt); write(nbt, false); }
+    public final void saveAdditional(@NotNull CompoundTag nbt) {
+      super.saveAdditional(nbt); write(nbt, false);
+    }
 
     @Override
     public final void load(@NotNull CompoundTag nbt)
-    { super.load(nbt); read(nbt, false); }
+    {
+      super.load(nbt); read(nbt, false);
+    }
   }
-
 }

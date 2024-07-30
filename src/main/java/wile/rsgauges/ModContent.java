@@ -14,12 +14,9 @@ package wile.rsgauges;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.ObjectHolder;
 import wile.rsgauges.blocks.*;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.items.SwitchLinkPearlItem;
@@ -1186,35 +1183,4 @@ public class ModContent {
   public static void initItems() {
     Registries.addItem("switchlink_pearl", ( )-> new SwitchLinkPearlItem(new Item.Properties()));
   }
-
-  public static Block getBlock(String name) {
-    return Registries.getBlock(name);
-  }
-
-  //--------------------------------------------------------------------------------------------------------------------
-  // Tile entities bound exclusively to the blocks above
-  //--------------------------------------------------------------------------------------------------------------------
-
-  @ObjectHolder(registryName = "block_entity_type", value = "rsgauges:te_gauge")
-  public static final BlockEntityType<AbstractGaugeBlock.GaugeTileEntity> TET_GAUGE = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_switch")
-  public static final BlockEntityType<SwitchBlock.SwitchTileEntity> TET_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_contact_switch")
-  public static final BlockEntityType<ContactSwitchBlock.ContactSwitchTileEntity> TET_CONTACT_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_detector_switch")
-  public static final BlockEntityType<EntityDetectorSwitchBlock.DetectorSwitchTileEntity> TET_DETECTOR_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_envsensor_switch")
-  public static final BlockEntityType<EnvironmentalSensorSwitchBlock.EnvironmentalSensorSwitchTileEntity> TET_ENVSENSOR_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_daytimer_switch")
-  public static final BlockEntityType<DayTimerSwitchBlock.DayTimerSwitchTileEntity> TET_DAYTIMER_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_intervaltimer_switch")
-  public static final BlockEntityType<IntervalTimerSwitchBlock.IntervalTimerSwitchTileEntity> TET_TIMER_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_comparator_switch")
-  public static final BlockEntityType<ComparatorSwitchBlock.ComparatorSwitchTileEntity> TET_COMPARATOR_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_observer_switch")
-  public static final BlockEntityType<ObserverSwitchBlock.ObserverSwitchTileEntity> TET_OBSERVER_SWITCH = null;
-  @ObjectHolder(registryName = "block_entity_type", value =  "rsgauges:te_doorsensor_switch")
-  public static final BlockEntityType<DoorSensorSwitchBlock.DoorSensorSwitchTileEntity> TET_DOORSENSOR_SWITCH = null;
-  @ObjectHolder(registryName = "item", value =  "rsgauges:switchlink_pearl")
-  public static final SwitchLinkPearlItem SWITCH_LINK_PEARL = null;
 }

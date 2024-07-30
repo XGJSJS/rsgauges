@@ -25,8 +25,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ModConfig
-{
+public class ModConfig {
   public static final CommonConfig COMMON;
   public static final ServerConfig SERVER;
   public static final ForgeConfigSpec COMMON_CONFIG_SPEC;
@@ -43,8 +42,7 @@ public class ModConfig
 
   //--------------------------------------------------------------------------------------------------------------------
 
-  public static class CommonConfig
-  {
+  public static class CommonConfig {
     // Optout
     public final ForgeConfigSpec.ConfigValue<String> pattern_excludes;
     public final ForgeConfigSpec.ConfigValue<String> pattern_includes;
@@ -61,8 +59,7 @@ public class ModConfig
     public final ForgeConfigSpec.IntValue autoswitch_linear_update_interval;
     public final ForgeConfigSpec.IntValue comparator_switch_update_interval;
 
-    CommonConfig(ForgeConfigSpec.Builder builder)
-    {
+    CommonConfig(ForgeConfigSpec.Builder builder) {
       builder.comment("Settings affecting the logical server side, but are also configurable in single player.")
         .push("server");
       // --- OPTOUTS ------------------------------------------------------------
@@ -171,8 +168,7 @@ public class ModConfig
   public static boolean isOptedOut(final @Nullable Block block)
   { return (block==null) || isOptedOut(block.asItem()); }
 
-  public static boolean isOptedOut(final @Nullable Item item)
-  {
+  public static boolean isOptedOut(final @Nullable Item item) {
     if (item == null) return true;
     ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
     return (key==null) || optouts_.contains(key.getPath());
@@ -265,8 +261,7 @@ public class ModConfig
     OptionalRecipeCondition.on_config(withExperimental(), withoutRecipes(), ModConfig::isOptedOut, ModConfig::isOptedOut);
   }
 
-  public static void apply()
-  {
+  public static void apply() {
     if((COMMON == null) || (!COMMON_CONFIG_SPEC.isLoaded())) return;
     with_config_logging_ = COMMON.with_config_logging.get();
     with_experimental_features_ = COMMON.with_experimental.get();
@@ -295,8 +290,7 @@ public class ModConfig
     log("Accepted wrenches: " + accepted_wrenches.stream().map(ResourceLocation::toString).collect(Collectors.joining(",")));
   }
 
-  public static void log(String config_message)
-  {
+  public static void log(String config_message) {
     if(!with_config_logging_) return;
     Auxiliaries.logInfo(config_message);
   }

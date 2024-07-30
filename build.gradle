@@ -73,9 +73,10 @@ jar.finalizedBy('reobfJar')
 // Signing
 import net.minecraftforge.gradle.common.tasks.SignJar
 project.afterEvaluate {
-  task signJar(type: SignJar, dependsOn: jar) {
+  tasks.register('signJar', SignJar) {
+    dependsOn jar
     onlyIf { project.hasProperty("keystore_file") }
-    if(project.hasProperty("keystore_file")) {
+    if (project.hasProperty("keystore_file")) {
       keyStore = project.getProperty("keystore_file")
       alias = project.getProperty("keystore_alias")
       storePass = project.getProperty("keystore_pass")

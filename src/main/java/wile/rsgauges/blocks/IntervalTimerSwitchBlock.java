@@ -8,7 +8,6 @@
  */
 package wile.rsgauges.blocks;
 
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -17,36 +16,29 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
 
-
-public class IntervalTimerSwitchBlock extends AutoSwitchBlock
-{
+public class IntervalTimerSwitchBlock extends AutoSwitchBlock {
   public IntervalTimerSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, powerOnSound, powerOffSound); }
-
-  public IntervalTimerSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
-  { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  @Nullable
   public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new IntervalTimerSwitchTileEntity(pos, state); }
 
@@ -71,11 +63,8 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
     private static final int t_max = 20 * 60 * 10; // 10min @20clk/s
     private static final int t_min =  5;           // 0.25s @20clk/s
 
-    public IntervalTimerSwitchTileEntity(BlockEntityType<?> te_type, BlockPos pos, BlockState state)
-    { super(te_type, pos, state); }
-
     public IntervalTimerSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_TIMER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_intervaltimer_switch"), pos, state); }
 
     private int p_set_  = 15;
     private int t_on_  = 20;
@@ -183,10 +172,10 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
         {
           MutableComponent separator = (Component.literal(" | ")); separator.withStyle(ChatFormatting.GRAY);
           ArrayList<Object> tr = new ArrayList<>();
-          tr.add(Auxiliaries.localizable("switchconfig.intervaltimer.t_on", ChatFormatting.BLUE, new Object[]{RsAuxiliaries.ticksToSecondsString(t_on())}));
-          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.t_off", ChatFormatting.YELLOW, new Object[]{RsAuxiliaries.ticksToSecondsString(t_off())})));
-          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.output_power", ChatFormatting.RED, new Object[]{p_set()})));
-          if(ramp()>0) tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.ramp", ChatFormatting.DARK_GREEN, new Object[]{ramp()})));
+          tr.add(Auxiliaries.localizable("switchconfig.intervaltimer.t_on", ChatFormatting.BLUE, RsAuxiliaries.ticksToSecondsString(t_on())));
+          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.t_off", ChatFormatting.YELLOW, RsAuxiliaries.ticksToSecondsString(t_off()))));
+          tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.output_power", ChatFormatting.RED, p_set())));
+          if(ramp()>0) tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.ramp", ChatFormatting.DARK_GREEN, ramp())));
           if(!switch_state) tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.intervaltimer.standby", ChatFormatting.AQUA)));
           while(tr.size() < 5) tr.add(Component.literal("")); // const lang file formatting arg count.
           Overlay.show(player, Auxiliaries.localizable("switchconfig.intervaltimer", ChatFormatting.RESET, tr.toArray()));
@@ -238,5 +227,4 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
       }
     }
   }
-
 }

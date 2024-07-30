@@ -24,8 +24,7 @@ import wile.rsgauges.detail.ModResources;
 import javax.annotation.Nullable;
 
 
-public class IndicatorBlock extends AbstractGaugeBlock
-{
+public class IndicatorBlock extends AbstractGaugeBlock {
   public static final BooleanProperty POWERED = BooleanProperty.create("power");
 
   public IndicatorBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBB, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
@@ -39,8 +38,7 @@ public class IndicatorBlock extends AbstractGaugeBlock
 
   @Override
   @Nullable
-  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
-  {
+  public BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
     final BlockState state = super.getStateForPlacement(context);
     return (state==null) ? (null) : (state.setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos())));
   }

@@ -42,7 +42,7 @@ public class ModRsGauges {
     Auxiliaries.logGitVersion(MODNAME);
     Registries.init(MODID, "industrial_small_lever");
     ModContent.init(MODID, eventBus);
-    OptionalRecipeCondition.init(MODID, LOGGER);
+    OptionalRecipeCondition.init(MODID);
     ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, ModConfig.COMMON_CONFIG_SPEC);
     eventBus.addListener(ForgeEvents::onSetup);
     eventBus.addListener(ForgeEvents::onClientSetup);

@@ -7,18 +7,20 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class RsItem extends Item
-{
-  RsItem(Item.Properties properties)
-  { super(properties); }
+public abstract class RsItem extends Item {
+  RsItem(Item.Properties properties) {
+    super(properties);
+  }
 
   @Override
   @OnlyIn(Dist.CLIENT)
-  public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag)
-  { Auxiliaries.Tooltip.addInformation(stack, world, tooltip, flag, true); }
+  public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
+    Auxiliaries.Tooltip.addInformation(stack, tooltip, true);
+  }
 }

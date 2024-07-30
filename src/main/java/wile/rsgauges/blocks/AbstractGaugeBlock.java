@@ -45,7 +45,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import wile.rsgauges.ModConfig;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.SwitchLink;
 import wile.rsgauges.detail.SwitchLink.LinkMode;
@@ -53,18 +52,17 @@ import wile.rsgauges.detail.SwitchLink.RequestResult;
 import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-
-public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, SwitchLink.ISwitchLinkable
-{
-  public static final long GAUGE_DATA_POWER_MASK            = 0x000000000000000fl;
+public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, SwitchLink.ISwitchLinkable {
+  public static final long GAUGE_DATA_POWER_MASK            = 0x000000000000000fL;
   public static final int  GAUGE_DATA_POWER_SHIFT           = 0;
-  public static final long GAUGE_DATA_BLINKING              = 0x0000000000000100l;
-  public static final long GAUGE_DATA_INVERTED              = 0x0000000000000200l;
-  public static final long GAUGE_DATA_COMPARATOR_MODE       = 0x0000000000000800l;
+  public static final long GAUGE_DATA_BLINKING              = 0x0000000000000100L;
+  public static final long GAUGE_DATA_INVERTED              = 0x0000000000000200L;
+  public static final long GAUGE_DATA_COMPARATOR_MODE       = 0x0000000000000800L;
 
   @Nullable public final ModResources.BlockSoundEvent power_on_sound;
   @Nullable public final ModResources.BlockSoundEvent power_off_sound;
@@ -74,49 +72,42 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
   public AbstractGaugeBlock(long config, BlockBehaviour.Properties props, final AABB aabb, @Nullable ModResources.BlockSoundEvent powerOnSound, @Nullable ModResources.BlockSoundEvent powerOffSound)
   { super(config, props, aabb, null); power_on_sound = powerOnSound; power_off_sound = powerOffSound; }
 
-  public AbstractGaugeBlock(long config, BlockBehaviour.Properties props, final AABB aabb)
-  { this(config, props, aabb, null, null); }
-
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
-  {
-    if((world.isClientSide()) || (!isAffectedByNeigbour(state, world, pos, fromPos))) return;
+  public void neighborChanged(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving) {
+    if ((world.isClientSide()) || (!isAffectedByNeigbour(state, world, pos, fromPos))) return;
     final GaugeTileEntity te = getTe(world, pos);
-    if(te == null) te.reset_timer();
+    if (te != null) te.reset_timer();
   }
 
   @Override
-  public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+  public void setPlacedBy(Level world, @NotNull BlockPos pos, BlockState state, LivingEntity placer, @NotNull ItemStack stack)
   { world.scheduleTick(pos, state.getBlock(), 1); }
 
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
-  {
-    if(world.isClientSide()) return InteractionResult.SUCCESS;
+  public @NotNull InteractionResult use(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+    if (world.isClientSide()) return InteractionResult.SUCCESS;
     ItemStack stack_held = player.getItemInHand(hand);
-    if(ModConfig.isWrench(stack_held)) {
+    if (ModConfig.isWrench(stack_held)) {
       GaugeTileEntity te = getTe(world, pos);
-      if(te==null) return InteractionResult.CONSUME;
+      if (te==null) return InteractionResult.CONSUME;
       te.on_wrench(state, world, pos, player, player.getItemInHand(hand));
-    } else if((stack_held.getItem() == Items.ENDER_PEARL) || (stack_held.getItem() == ModContent.SWITCH_LINK_PEARL)) {
+    } else if (stack_held.getItem() == Items.ENDER_PEARL || stack_held.getItem() == Registries.getItem("switchlink_pearl")) {
       attack(state, world, pos, player);
     }
     return InteractionResult.CONSUME;
   }
 
   @Override
-  @SuppressWarnings("deprecation")
-  public void attack(BlockState state, Level world, BlockPos pos, Player player)
-  {
+  public void attack(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, Player player) {
     final ItemStack item_held = player.getInventory().getSelected();
-    if(item_held.getItem() == Items.ENDER_PEARL) {
+    if (item_held.getItem() == Items.ENDER_PEARL) {
       if(ModConfig.without_switch_linking) return;
       ItemStack link_stack = SwitchLinkPearlItem.createFromPearl(world, pos, player);
-      if(link_stack.isEmpty()) {
+      if (link_stack.isEmpty()) {
         Overlay.show(player, Auxiliaries.localizable("switchlinking.target_assign.error_notarget"));
         ModResources.BlockSoundEvents.SWITCHLINK_CANNOT_LINK_THAT.play(world, pos);
       } else {
@@ -124,10 +115,10 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
         Overlay.show(player, Auxiliaries.localizable("switchlinking.target_assign.ok"));
         ModResources.BlockSoundEvents.SWITCHLINK_LINK_TARGET_SELECTED.play(world, pos);
       }
-    } else if(item_held.getItem() == ModContent.SWITCH_LINK_PEARL) {
-      if(ModConfig.without_switch_linking) return;
-      if(SwitchLinkPearlItem.cycleLinkMode(item_held, world, pos, true)) {
-        Overlay.show(player, Auxiliaries.localizable("switchlinking.relayconfig.confval" + Integer.toString(SwitchLink.fromItemStack(item_held).mode().index())));
+    } else if (item_held.getItem() == Registries.getItem("switchlink_pearl")) {
+      if (ModConfig.without_switch_linking) return;
+      if (SwitchLinkPearlItem.cycleLinkMode(item_held, world, pos, true)) {
+        Overlay.show(player, Auxiliaries.localizable("switchlinking.relayconfig.confval" + SwitchLink.fromItemStack(item_held).mode().index()));
       } else {
         Overlay.show(player, Auxiliaries.localizable("switchlinking.source_assign.error_nosource"));
       }
@@ -161,7 +152,7 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
 
   @Override
   @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
   { return new GaugeTileEntity(pos, state); }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -189,10 +180,6 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
   { return true; }
 
   @Override
-  public boolean switchLinkHasSourceSupport(Level world, BlockPos pos)
-  { return false; }
-
-  @Override
   public boolean switchLinkHasAnalogSupport(Level world, BlockPos pos)
   { return true; }
 
@@ -209,34 +196,30 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
   }
 
   @Override
-  public Optional<Integer> switchLinkInputPower(Level world, BlockPos pos)
-  { return Optional.empty(); }
-
-  @Override
-  public Optional<Integer> switchLinkComparatorInput(Level world, BlockPos pos)
-  { return Optional.empty(); }
-
-  @Override
-  public SwitchLink.RequestResult switchLinkTrigger(SwitchLink link)
-  {
-    GaugeTileEntity te = getTe(link.world, link.target_position);
-    if(te==null) return RequestResult.TARGET_GONE;
-    te.switchlink_input(link.source_analog_power);
-    return RequestResult.OK;
+  public SwitchLink.RequestResult switchLinkTrigger(SwitchLink link) {
+    if (link.world != null) {
+      GaugeTileEntity te = getTe(link.world, link.target_position);
+      if (te == null) return RequestResult.TARGET_GONE;
+      te.switchlink_input(link.source_analog_power);
+      return RequestResult.OK;
+    }
+    return RequestResult.INVALID_LINKDATA;
   }
 
   @Override
-  public void switchLinkInit(SwitchLink link)
-  {
-    GaugeTileEntity te = getTe(link.world, link.target_position);
-    if(te!=null) te.switchlink_input(link.source_analog_power);
+  public void switchLinkInit(SwitchLink link) {
+    if (link.world != null) {
+      GaugeTileEntity te = getTe(link.world, link.target_position);
+      if (te != null) te.switchlink_input(link.source_analog_power);
+    }
   }
 
   @Override
-  public void switchLinkUnlink(SwitchLink link)
-  {
-    GaugeTileEntity te = getTe(link.world, link.target_position);
-    if(te!=null) te.switchlink_input(0);
+  public void switchLinkUnlink(SwitchLink link) {
+    if (link.world != null) {
+      GaugeTileEntity te = getTe(link.world, link.target_position);
+      if(te!=null) te.switchlink_input(0);
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -261,7 +244,7 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
     private int switchlink_input_ = 0;
 
     public GaugeTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_GAUGE, pos, state); }
+    { super(Registries.getBlockEntityType("te_gauge"), pos, state); }
 
     public int power()
     { return (int)((scd_ & GAUGE_DATA_POWER_MASK) >> GAUGE_DATA_POWER_SHIFT); }
@@ -274,9 +257,6 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
 
     public void inverted(boolean i)
     { scd_ =  (scd_ & (~GAUGE_DATA_INVERTED)) | (i ? GAUGE_DATA_INVERTED : 0); }
-
-    public int switchlink_input()
-    { return switchlink_input_; }
 
     public void switchlink_input(int power)
     { switchlink_input_ = power; trigger_timer_ = Math.min(trigger_timer_, 1); }
@@ -309,8 +289,7 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
       }
     }
 
-    public void on_wrench(BlockState state, Level world, BlockPos pos, Player player, ItemStack wrench)
-    {
+    public void on_wrench(BlockState state, Level world, BlockPos pos, Player player, ItemStack wrench) {
       long t = world.getGameTime();
       if(Math.abs(t-last_wrench_click_) < 40) {
         switch ((inverted() ? 1 : 0) | (comparator_mode() ? 2 : 0)) {
@@ -358,7 +337,7 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
         // Tick update
         {
           final BlockPos neighbourPos = worldPosition.relative((Direction) state.getValue(AbstractGaugeBlock.FACING), -1);
-          if(!level.hasChunkAt(neighbourPos)) return;
+          if (!level.hasChunkAt(neighbourPos)) return;
           final BlockState neighborState = level.getBlockState(neighbourPos);
           int p = 0;
           if(comparator_mode()) {
@@ -380,13 +359,11 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
                 if((p >= 15) || (is_indicator && (p>0))) break;
                 final BlockPos nbp = neighbourPos.relative(nbf);
                 if(!level.hasChunkAt(nbp)) continue;
-                final BlockState nbs = level.getBlockState(nbp);
                 p = Math.max(p, level.getSignal(nbp, nbf));
               }
             }
           }
           if(inverted()) p = Mth.clamp(15-p, 0, 15);
-          final boolean sync = (power() != p);
           if((block.config & GAUGE_DATA_BLINKING) == 0) {
             if((block.power_on_sound != null) && (power() == 0) && (p > 0)) {
               block.power_on_sound.play(level, worldPosition);
@@ -421,9 +398,9 @@ public class AbstractGaugeBlock extends RsDirectedBlock implements EntityBlock, 
             }
           }
         }
-      } catch(Throwable e) {
+      } catch (Throwable e) {
         trigger_timer_ = 100;
-        Auxiliaries.logger().error("TE update() failed: " + e);
+          Auxiliaries.logger().error("TE update() failed: {}", e.getMessage());
       }
     }
   }
