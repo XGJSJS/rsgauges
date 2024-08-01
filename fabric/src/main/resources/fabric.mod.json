@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "rsgauges",
+  "version": "${version}",
+  "name": "Gauges and Switches",
+  "description": "Adds redstone metering gauges, levers, buttons, pressure plates, and all sorts of other sensors and detector switches to the game.",
+  "authors": [
+    "wilechaote",
+    "XGJS"
+  ],
+  "contact": {
+    "homepage": "https://github.com/XGJSJS/rsgauges",
+    "sources": "https://github.com/XGJSJS/rsgauges/issues/"
+  },
+  "license": "MIT",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "wile.rsgauges.fabric.RsGaugesFabric"
+    ],
+    "client": [
+      "wile.rsgauges.fabric.client.RsGaugesFabricClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "architectury": "*",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

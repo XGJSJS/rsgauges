@@ -1,91 +1,78 @@
-// @file build.gradle
-// Gauges and Switches mod gradle build relay
-buildscript {
-  repositories {
-    maven { url = 'https://maven.minecraftforge.net' }
-    mavenCentral()
-  }
-  dependencies {
-    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '[6.0,6.2)', changing: true
-  }
-}
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-//-----------------------------------------------------------------------------
-version = "${version_rsgauges}"
-group = "wile.rsgauges"
-archivesBaseName = "rsgauges-${version_minecraft}"
-
-repositories {
-  maven { name = "Progwml6 maven"; url = "https://dvs1.progwml6.com/files/maven/" } // JEI files before January 2023
-  maven { name = "Jared's maven"; url = "https://maven.blamejared.com/" } // JEI files since January 2023
-  maven { name = "ModMaven"; url = "https://modmaven.dev" } // JEI files, fallback
-  flatDir { dir 'libs' } // Mod jar dependencies in ./libs
+plugins {
+    id 'dev.architectury.loom' version '1.6-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.4-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
 
-minecraft {
-  mappings channel: "official", version: "${version_minecraft}"
-  runs {
-    client {
-      workingDirectory project.file('run')
-      property 'forge.logging.markers', '' // SCAN,REGISTRIES,REGISTRYDUMP
-      property 'forge.logging.console.level', 'info'
-      mods { rsgauges { source sourceSets.main } } }
-    server {
-      workingDirectory project.file('run')
-      property 'forge.logging.markers', '' // SCAN,REGISTRIES,REGISTRYDUMP
-      property 'forge.logging.console.level', 'info'
-      mods { rsgauges { source sourceSets.main } }
+architectury {
+    minecraft = project.minecraft_version
+}
+
+allprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
+}
+
+subprojects {
+    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'architectury-plugin'
+    apply plugin: 'maven-publish'
+
+    base {
+        // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
+        archivesName = "$rootProject.archives_name-$project.name"
     }
-  }
-}
 
-dependencies {
-  minecraft "net.minecraftforge:forge:${version_forge_minecraft}"
-  compileOnly fg.deobf("mezz.jei:jei-${version_minecraft}-common-api:${version_jei}")
-  compileOnly fg.deobf("mezz.jei:jei-${version_minecraft}-forge-api:${version_jei}")
-  runtimeOnly fg.deobf("mezz.jei:jei-${version_minecraft}-forge:${version_jei}")
-}
-
-processResources {
-  outputs.upToDateWhen { false }
-  doLast { file("${sourceSets.main.output.resourcesDir}/.gitversion-rsgauges").text = 'git log "-1" "--format=%h"'.execute().in.text.trim() }
-}
-
-jar {
-  manifest {
-    attributes([
-      "Specification-Title": "rsgauges",
-      "Specification-Vendor": "wilechaote",
-      "Specification-Version": "1", // We are version 1 of ourselves
-      "Implementation-Title": project.name,
-      "Implementation-Version": "${version_rsgauges}",
-      "Implementation-Vendor" :"wilechaote",
-      "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-    ])
-  }
-}
-
-jar.finalizedBy('reobfJar')
-
-// Signing
-import net.minecraftforge.gradle.common.tasks.SignJar
-project.afterEvaluate {
-  tasks.register('signJar', SignJar) {
-    dependsOn jar
-    onlyIf { project.hasProperty("keystore_file") }
-    if (project.hasProperty("keystore_file")) {
-      keyStore = project.getProperty("keystore_file")
-      alias = project.getProperty("keystore_alias")
-      storePass = project.getProperty("keystore_pass")
-      keyPass = project.getProperty("keystore_keypass")
-      inputFile = jar.archiveFile
-      outputFile = jar.archiveFile
-    } else {
-      logger.warn("[WARNING] Signing skipped.")
+    repositories {
+        // Add repositories to retrieve artifacts from in here.
+        // You should only use this when depending on other mods because
+        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+        // for more information about repositories.
+        maven { name = "Progwml6 maven"; url = "https://dvs1.progwml6.com/files/maven/" } // JEI files before January 2023
+        maven { name = "Jared's maven"; url = "https://maven.blamejared.com/" } // JEI files since January 2023
+        maven { name = "ModMaven"; url = "https://modmaven.dev" } // JEI files, fallback
+        flatDir { dir 'libs' } // Mod jar dependencies in ./libs
     }
-  }
-  reobfJar.finalizedBy('signJar')
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    dependencies {
+        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
+        mappings loom.officialMojangMappings()
+    }
+
+    java {
+        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+        // if it is present.
+        // If you remove this line, sources will not be generated.
+        withSourcesJar()
+
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = 17
+    }
+
+    // Configure Maven publishing.
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = base.archivesName.get()
+                from components.java
+            }
+        }
+
+        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+        repositories {
+            // Add repositories to publish to here.
+            // Notice: This block does NOT have the same function as the block in the top level.
+            // The repositories here will be used for publishing your artifact, not for
+            // retrieving dependencies.
+        }
+    }
 }
