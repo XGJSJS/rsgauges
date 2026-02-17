@@ -16,13 +16,13 @@ public final class RsGaugesMod {
         Auxiliaries.logGitVersion(MODNAME);
         ModRegistries.init();
         ModContent.init();
-        Networking.init(MODID);
+        Networking.init();
         Overlay.register();
         BlockCategories.update();
     }
 
     @Environment(EnvType.CLIENT)
     public static void initClient() {
-        Networking.initClient(MODID);
+        Networking.initClient();
     }
 }

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class ModJEIPlugin implements IModPlugin {
   @Override
   public @NotNull ResourceLocation getPluginUid() {
-    return new ResourceLocation(RsGaugesMod.MODID, "jei_plugin_uid");
+    return ResourceLocation.fromNamespaceAndPath(RsGaugesMod.MODID, "jei_plugin_uid");
   }
 
   @Override

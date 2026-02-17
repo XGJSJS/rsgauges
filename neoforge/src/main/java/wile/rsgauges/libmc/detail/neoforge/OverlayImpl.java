@@ -6,7 +6,7 @@
  *
  * Renders status messages in one line.
  */
-package wile.rsgauges.libmc.detail.forge;
+package wile.rsgauges.libmc.detail.neoforge;
 
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
@@ -15,19 +15,19 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import wile.rsgauges.libmc.detail.Networking;
 import wile.rsgauges.libmc.detail.SidedProxy;
 
 public class OverlayImpl {
   public static void register() {
     if (SidedProxy.mc() != null) {
-      MinecraftForge.EVENT_BUS.register(new TextOverlayGui());
+      NeoForge.EVENT_BUS.register(TextOverlayGui.class);
       Networking.OverlayTextMessage.setHandler(TextOverlayGui::show);
     }
   }
@@ -39,12 +39,11 @@ public class OverlayImpl {
   // Client side handler
   // -----------------------------------------------------------------------------
 
-  @Mod.EventBusSubscriber(value = Dist.CLIENT)
+  @EventBusSubscriber(value = Dist.CLIENT)
   @OnlyIn(Dist.CLIENT)
   public static class TextOverlayGui extends Screen {
     private static final Component EMPTY_TEXT = Component.empty();
     private static final double overlay_y_ = 0.75;
-    private final Minecraft mc;
     private static long deadline_;
     private static Component text_;
 
@@ -66,19 +65,18 @@ public class OverlayImpl {
 
     TextOverlayGui() {
       super(EMPTY_TEXT);
-      mc = SidedProxy.mc();
     }
 
     @SubscribeEvent
-    public void render(RenderGuiOverlayEvent.Post event) {
+    public static void render(RenderGuiLayerEvent.Post event) {
       if (deadline() < System.currentTimeMillis() || text() == EMPTY_TEXT)
         return;
       String txt = text().getString();
       if (txt.isEmpty())
         return;
       GuiGraphics guiGraphics = event.getGuiGraphics();
-      final Window win = mc.getWindow();
-      final Font fr = mc.font;
+      final Window win = Minecraft.getInstance().getWindow();
+      final Font fr = Minecraft.getInstance().font;
       final int cx = win.getGuiScaledWidth() / 2;
       final int cy = (int)(win.getGuiScaledHeight() * overlay_y_);
       final int w = fr.width(txt);

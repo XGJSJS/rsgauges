@@ -13,7 +13,6 @@ package wile.rsgauges.blocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,10 +33,9 @@ public class TrapdoorSwitchBlock extends ContactSwitchBlock {
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
+
   @Override
-  @SuppressWarnings("deprecation")
-  public boolean isPathfindable(@NotNull BlockState state, @NotNull BlockGetter worldIn, @NotNull BlockPos pos, PathComputationType type) {
-    /// -> was public boolean isPassable(LevelReader world, BlockPos pos)
+  protected boolean isPathfindable(BlockState state, PathComputationType type) {
     return switch (type) {
       case LAND, AIR -> (!state.getValue(POWERED));
       default -> true;

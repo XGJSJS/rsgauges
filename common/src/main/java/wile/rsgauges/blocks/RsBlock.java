@@ -13,19 +13,13 @@
  */
 package wile.rsgauges.blocks;
 
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -46,7 +40,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -92,24 +85,19 @@ public abstract class RsBlock extends Block implements EntityBlock {
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
+
   @Override
-  public void appendHoverText(final @NotNull ItemStack stack, @Nullable BlockGetter world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
-    if (Platform.getEnv() == EnvType.CLIENT)
-      Auxiliaries.Tooltip.addInformation(stack, tooltip, true);
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
+    Auxiliaries.Tooltip.addInformation(stack, tooltip, true);
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter source, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return Shapes.block(); }
 
   @Override
-  @SuppressWarnings("deprecation")
   public @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext selectionContext)
   { return getShape(state, world, pos, selectionContext); }
-
-  public boolean isValidSpawn(BlockState state, BlockGetter world, BlockPos pos, SpawnPlacements.Type type, @Nullable EntityType<?> entityType)
-  { return false; }
 
   public PushReaction getPistonPushReaction(BlockState state)
   { return PushReaction.DESTROY; }
@@ -134,7 +122,6 @@ public abstract class RsBlock extends Block implements EntityBlock {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public @NotNull FluidState getFluidState(@NotNull BlockState state)
   { return ((config & RSBLOCK_NOT_WATERLOGGABLE)==0) ? (state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state)) : super.getFluidState(state); }
 
@@ -146,7 +133,6 @@ public abstract class RsBlock extends Block implements EntityBlock {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void onRemove(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull BlockState newState, boolean isMoving)
   {
     super.onRemove(state, world, pos, newState, isMoving);
@@ -155,7 +141,6 @@ public abstract class RsBlock extends Block implements EntityBlock {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction facing, @NotNull BlockState facingState, @NotNull LevelAccessor world, @NotNull BlockPos pos, @NotNull BlockPos facingPos)
   {
     if((config & RSBLOCK_NOT_WATERLOGGABLE)==0) {
@@ -165,29 +150,13 @@ public abstract class RsBlock extends Block implements EntityBlock {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void neighborChanged(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving)
   {}
 
   @Override
-  public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+  public @NotNull List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
     return Collections.singletonList(new ItemStack(state.getBlock().asItem()));
   }
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public void attack(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player)
-  {}
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
-  { return InteractionResult.PASS; }
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public void tick(@NotNull BlockState state, @NotNull ServerLevel world, @NotNull BlockPos pos, @NotNull RandomSource rnd)
-  {}
 
   // -------------------------------------------------------------------------------------------------------------------
   // Basic tile entity
@@ -216,14 +185,15 @@ public abstract class RsBlock extends Block implements EntityBlock {
     // --------------------------------------------------------------------------------------------------------
 
     @Override
-    public final void saveAdditional(@NotNull CompoundTag nbt) {
-      super.saveAdditional(nbt); write(nbt, false);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
+      super.saveAdditional(nbt, provider);
+      write(nbt, false);
     }
 
     @Override
-    public final void load(@NotNull CompoundTag nbt)
-    {
-      super.load(nbt); read(nbt, false);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
+      super.loadAdditional(nbt, provider);
+      read(nbt, false);
     }
   }
 }

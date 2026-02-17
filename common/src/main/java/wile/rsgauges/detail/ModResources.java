@@ -24,7 +24,7 @@ import wile.rsgauges.libmc.detail.SidedProxy;
 
 public class ModResources {
   public static RegistrySupplier<SoundEvent> createSoundEvent(String name) {
-    return ModRegistries.sound_deferred_register.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(RsGaugesMod.MODID, name)));
+    return ModRegistries.sound_deferred_register.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(RsGaugesMod.MODID, name)));
   }
 
   /**

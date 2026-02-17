@@ -6,25 +6,28 @@
  *
  * Main mod class.
  */
-package wile.rsgauges.forge;
+package wile.rsgauges.neoforge;
 
-import dev.architectury.platform.forge.EventBuses;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import com.mojang.serialization.MapCodec;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wile.rsgauges.RsGaugesMod;
 import wile.rsgauges.libmc.detail.Auxiliaries;
-import wile.rsgauges.forge.libmc.detail.OptionalRecipeCondition;
-import wile.rsgauges.forge.libmc.detail.PlayerBlockInteraction;
+import wile.rsgauges.neoforge.libmc.detail.OptionalRecipeCondition;
+import wile.rsgauges.neoforge.libmc.detail.PlayerBlockInteraction;
+
+import java.util.function.Supplier;
 
 import static wile.rsgauges.RsGaugesMod.MODID;
 
@@ -32,31 +35,28 @@ import static wile.rsgauges.RsGaugesMod.MODID;
 public class RsGaugesForge {
   private static final Logger LOGGER = LogManager.getLogger();
 
+  public static final DeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS =
+          DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, MODID);
+  public static final Supplier<MapCodec<OptionalRecipeCondition>> OPTIONAL_CONDITION =
+          CONDITION_CODECS.register("optional", () -> OptionalRecipeCondition.Serializer.CODEC);
+
   // -------------------------------------------------------------------------------------------------------------------
 
-  public RsGaugesForge() {
-    IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-    EventBuses.registerModEventBus(RsGaugesMod.MODID, eventBus);
+  public RsGaugesForge(IEventBus eventBus, ModContainer modContainer) {
     RsGaugesMod.init();
     Auxiliaries.init(MODID, LOGGER, ModConfigImpl::getServerConfig);
-    OptionalRecipeCondition.init(MODID);
-    ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, ModConfigImpl.COMMON_CONFIG_SPEC);
-    eventBus.addListener(ForgeEvents::onSetup);
+    modContainer.registerConfig(ModConfig.Type.COMMON, ModConfigImpl.COMMON_CONFIG_SPEC);
     eventBus.addListener(ForgeEvents::onClientSetup);
-    MinecraftForge.EVENT_BUS.register(this);
     PlayerBlockInteraction.init();
+    CONDITION_CODECS.register(eventBus);
   }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Events
   // -------------------------------------------------------------------------------------------------------------------
 
-  @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+  @EventBusSubscriber
   public static final class ForgeEvents {
-    public static void onSetup(final FMLCommonSetupEvent event) {
-      CraftingHelper.register(OptionalRecipeCondition.Serializer.INSTANCE);
-    }
-
     public static void onClientSetup(final FMLClientSetupEvent event) {
       RsGaugesMod.initClient();
     }

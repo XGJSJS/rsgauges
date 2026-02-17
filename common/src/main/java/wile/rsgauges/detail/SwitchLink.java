@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import wile.rsgauges.ModConfig;
+import wile.rsgauges.ModContent;
 import wile.rsgauges.libmc.detail.ModRegistries;
 
 import java.util.Arrays;
@@ -98,11 +99,16 @@ public class SwitchLink {
   public SwitchLink mode(LinkMode rm)
   { config = (config & ~0xfL)|(rm.index()); return this; }
 
-  public static SwitchLink fromNbt(final CompoundTag nbt)
-  { return (nbt == null) ? (new SwitchLink()) : (new SwitchLink(BlockPos.of(nbt.getLong("p")), nbt.getString("b"), nbt.getLong("t"))); }
+  public static SwitchLink fromNbt(final CompoundTag nbt) {
+    return (nbt == null) ? new SwitchLink() : new SwitchLink(BlockPos.of(nbt.getLong("p")), nbt.getString("b"), nbt.getLong("t"));
+  }
+
+  public static SwitchLink fromComponent(final ModContent.SwitchLinkRecord record) {
+    return (record== null) ? new SwitchLink() : new SwitchLink(record.pos(), record.b(), record.t());
+  }
 
   public static SwitchLink fromItemStack(ItemStack stack) {
-    return ((stack == null) || (stack.getItem() != ModRegistries.getItem("switchlink_pearl"))) ? (new SwitchLink()) : (fromNbt(stack.getTag()));
+    return ((stack == null) || (stack.getItem() != ModRegistries.getItem("switchlink_pearl"))) ? (new SwitchLink()) : (fromComponent(stack.get(ModContent.SWITCH_LINK.get())));
   }
 
   public static SwitchLink fromTargetPosition(final Level world, final BlockPos pos) {
@@ -116,7 +122,7 @@ public class SwitchLink {
   public static SwitchLink fromPlayerActiveItem(Level world, Player player) {
     if (player == null || world.isClientSide() || !Objects.equals(player.getInventory().getSelected().getItem(), ModRegistries.getItem("switchlink_pearl")))
       return new SwitchLink();
-    return SwitchLink.fromNbt(player.getInventory().getSelected().getTag());
+    return SwitchLink.fromComponent(player.getInventory().getSelected().get(ModContent.SWITCH_LINK.get()));
   }
 
   public CompoundTag toNbt() {
@@ -127,9 +133,13 @@ public class SwitchLink {
     return nbt;
   }
 
+  public ModContent.SwitchLinkRecord toComponent() {
+    return new ModContent.SwitchLinkRecord(target_position, block_name, config);
+  }
+
   public ItemStack toSwitchLinkPearl() {
     ItemStack stack = new ItemStack(ModRegistries.getItem("switchlink_pearl"), 1);
-    stack.setTag(toNbt());
+    stack.set(ModContent.SWITCH_LINK.get(), toComponent());
     return stack;
   }
 

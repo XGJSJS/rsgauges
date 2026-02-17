@@ -33,7 +33,7 @@ public class PulseKnockSwitchBlock extends PulseSwitchBlock implements INeighbou
   // -------------------------------------------------------------------------------------------------------------------
 
   @Override
-  public boolean onNeighborBlockPlayerInteraction(Level world, BlockPos pos, BlockState state, BlockPos fromPos, LivingEntity entity, InteractionHand hand, boolean isLeftClick) {
+  public boolean onNeighborBlockPlayerInteraction(Level world, BlockPos pos, BlockState state, BlockPos fromPos, LivingEntity entity, InteractionHand hand) {
     Direction facing = state.getValue(SwitchBlock.FACING);
     if(!pos.relative(facing).equals(fromPos)) return false;
     onSwitchActivated(world, pos, state, null, facing);

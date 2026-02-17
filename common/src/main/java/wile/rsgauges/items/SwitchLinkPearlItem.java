@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import wile.rsgauges.ModConfig;
+import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.SwitchLink;
 import wile.rsgauges.detail.SwitchLink.ISwitchLinkable;
@@ -58,34 +58,34 @@ public class SwitchLinkPearlItem extends RsItem {
   }
 
   @Override
-  public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
     final SwitchLink link = SwitchLink.fromItemStack(stack);
     if (Auxiliaries.Tooltip.addInformation(stack, tooltip, (!link.valid))) return;
     if (!link.valid) return;
-    final Block targetBlock = BuiltInRegistries.BLOCK.get(new ResourceLocation(link.block_name));
-      tooltip.add(Auxiliaries.localizable(
-              "switchlinking.switchlink_pearl.tooltip.linkedblock",
-              ChatFormatting.GRAY,
-              (Component.translatable(targetBlock.getDescriptionId()))
-                      .withStyle(ChatFormatting.YELLOW)
-                      .withStyle(ChatFormatting.ITALIC)));
-      if (Minecraft.getInstance().player!=null) {
+    final Block targetBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(link.block_name));
+    tooltip.add(Auxiliaries.localizable(
+            "switchlinking.switchlink_pearl.tooltip.linkedblock",
+            ChatFormatting.GRAY,
+            (Component.translatable(targetBlock.getDescriptionId()))
+                    .withStyle(ChatFormatting.YELLOW)
+                    .withStyle(ChatFormatting.ITALIC)));
+    if (Minecraft.getInstance().player!=null) {
       final int distance = link.distance(Minecraft.getInstance().player.blockPosition());
       if (distance >= 0) {
         tooltip.add(Component.literal(Auxiliaries.localizable(
-          "switchlinking.switchlink_pearl.tooltip.linkeddistance",
-          ChatFormatting.GRAY, new Object[]{distance}).getString() + (
-            (((distance <= ModConfig.max_switch_linking_distance()) || (ModConfig.max_switch_linking_distance()<=0))) ? ("")
-            : (" " + Auxiliaries.localizable("switchlinking.switchlink_pearl.tooltip.toofaraway", ChatFormatting.DARK_RED).getString())
-          )
+                        "switchlinking.switchlink_pearl.tooltip.linkeddistance",
+                        ChatFormatting.GRAY, new Object[]{distance}).getString() + (
+                        (((distance <= ModConfig.max_switch_linking_distance()) || (ModConfig.max_switch_linking_distance()<=0))) ? ("")
+                                : (" " + Auxiliaries.localizable("switchlinking.switchlink_pearl.tooltip.toofaraway", ChatFormatting.DARK_RED).getString())
+                )
         ));
       }
     }
     tooltip.add(Auxiliaries.localizable(
-      "switchlinking.relayconfig.confval" + link.mode().index(),
-      ChatFormatting.ITALIC
+            "switchlinking.relayconfig.confval" + link.mode().index(),
+            ChatFormatting.ITALIC
     ));
-    super.appendHoverText(stack, world, tooltip, flag);
+    super.appendHoverText(stack, tooltipContext, tooltip, flag);
   }
 
   @Override
@@ -145,7 +145,7 @@ public class SwitchLinkPearlItem extends RsItem {
     if(stack_held.isEmpty()) return ItemStack.EMPTY;
     final ItemStack link_pearl = createForTarget(world, pos);
     if(link_pearl.isEmpty()) return ItemStack.EMPTY;
-    link_pearl.getOrCreateTag().putLong("cdtime", world.getGameTime());
+    link_pearl.set(ModContent.SWITCH_LINK_PEARL.get(), new ModContent.SwitchLinkPearlRecord(world.getGameTime()));
     if(stack_held.getCount() > 1) {
       // @todo: move shrinked ender pearl stack into another slot
       link_pearl.setCount(stack_held.getCount());
@@ -157,8 +157,8 @@ public class SwitchLinkPearlItem extends RsItem {
     final BlockState state = world.getBlockState(pos);
     if(!(state.getBlock() instanceof SwitchLink.ISwitchLinkable)) return ItemStack.EMPTY;
     ItemStack stack = new ItemStack(ModRegistries.getItem("switchlink_pearl"));
-    final SwitchLink.LinkMode mode = ((SwitchLink.ISwitchLinkable)state.getBlock()).switchLinkGetSupportedTargetModes().get(0);
-    stack.setTag(SwitchLink.fromTargetPosition(world, pos).mode(mode).toNbt());
+    final SwitchLink.LinkMode mode = ((SwitchLink.ISwitchLinkable)state.getBlock()).switchLinkGetSupportedTargetModes().getFirst();
+    stack.set(ModContent.SWITCH_LINK.get(), SwitchLink.fromTargetPosition(world, pos).mode(mode).toComponent());
     return stack;
   }
 
@@ -169,9 +169,9 @@ public class SwitchLinkPearlItem extends RsItem {
     if((!(state.getBlock() instanceof SwitchLink.ISwitchLinkable))) return false;
     final long t = world.getGameTime();
     if(with_click_time) {
-      final long dt = Math.abs(t-stack.getOrCreateTag().getLong("cdtime"));
+      final long dt = Math.abs(t - (stack.has(ModContent.SWITCH_LINK_PEARL.get())? stack.get(ModContent.SWITCH_LINK_PEARL.get()).cd_time() : 0) );
       if(dt < 7) return true;
-      if(dt > 40) { stack.getOrCreateTag().putLong("cdtime", t); return true; }
+      if(dt > 40) { stack.set(ModContent.SWITCH_LINK_PEARL.get(), new ModContent.SwitchLinkPearlRecord(t)); return true; }
     }
     final SwitchLink.ISwitchLinkable target = (SwitchLink.ISwitchLinkable)(state.getBlock());
     ImmutableList<SwitchLink.LinkMode> modes = target.switchLinkGetSupportedTargetModes();
@@ -179,8 +179,8 @@ public class SwitchLinkPearlItem extends RsItem {
     SwitchLink.LinkMode next = modes.get((index < 0) || (index>=modes.size()) ? 0 : index);
     lnk.mode(next);
     if(!lnk.valid) return false;
-    stack.setTag(lnk.toNbt());
-    stack.getOrCreateTag().putLong("cdtime", t);
+    stack.set(ModContent.SWITCH_LINK.get(), lnk.toComponent());
+    stack.set(ModContent.SWITCH_LINK_PEARL.get(), new ModContent.SwitchLinkPearlRecord(t));
     return true;
   }
 }

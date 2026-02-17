@@ -11,6 +11,7 @@ package wile.rsgauges.libmc.detail;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -43,6 +44,7 @@ public class ModRegistries {
   private static final DeferredRegister<BlockEntityType<?>> block_entity_deferred_register = DeferredRegister.create(RsGaugesMod.MODID, Registries.BLOCK_ENTITY_TYPE);
   private static final DeferredRegister<EntityType<?>> entity_deferred_register = DeferredRegister.create(RsGaugesMod.MODID, Registries.ENTITY_TYPE);
   private static final DeferredRegister<MenuType<?>> menu_deferred_register = DeferredRegister.create(RsGaugesMod.MODID, Registries.MENU);
+  public static final DeferredRegister<DataComponentType<?>> COMPONENT_TYPES = DeferredRegister.create(RsGaugesMod.MODID, Registries.DATA_COMPONENT_TYPE);
   public static final DeferredRegister<SoundEvent> sound_deferred_register = DeferredRegister.create(RsGaugesMod.MODID, Registries.SOUND_EVENT);
   public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(RsGaugesMod.MODID, Registries.CREATIVE_MODE_TAB);
 
@@ -53,6 +55,7 @@ public class ModRegistries {
   private static final ArrayList<Pair<Class<?>, RegistrySupplier<Block>>> registered_block_classes = new ArrayList<>();
 
   public static final RegistrySupplier<CreativeModeTab> TAB = CREATIVE_MODE_TAB.register("rsgauges", () -> CreativeTabRegistry.create(Component.translatable("itemGroup.tabrsgauges"), () -> new ItemStack(registered_items.get(creative_tab_icon).get())));
+
 
   public static void init() {}
 
@@ -114,16 +117,16 @@ public class ModRegistries {
     registered_block_entity_types.put(registry_name, blockEntityType);
   }
 
-  public static void addOptionalBlockTag(String tag_name, ResourceLocation... default_blocks) {
+  public static void addOptionalBlockTag(String tag_name, List<ResourceLocation> default_blocks) {
     final Set<Supplier<Block>> default_suppliers = new HashSet<>();
     for (ResourceLocation rl: default_blocks)
       default_suppliers.add(() -> BuiltInRegistries.BLOCK.get(rl));
-    final TagKey<Block> key = TagKey.create(Registries.BLOCK, new ResourceLocation(RsGaugesMod.MODID, tag_name));
+    final TagKey<Block> key = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(RsGaugesMod.MODID, tag_name));
     registered_block_tag_keys.put(tag_name, key);
   }
 
   public static void addOptionalBlockTag(String tag_name, String... default_blocks) {
-    addOptionalBlockTag(tag_name, Arrays.stream(default_blocks).map(ResourceLocation::new).toList().toArray(new ResourceLocation[]{}));
+    addOptionalBlockTag(tag_name, Arrays.stream(default_blocks).map(ResourceLocation::parse).toList());
   }
 
   public static void registerAll() {
@@ -136,5 +139,6 @@ public class ModRegistries {
     entity_deferred_register.register();
     menu_deferred_register.register();
     CREATIVE_MODE_TAB.register();
+    COMPONENT_TYPES.register();
   }
 }

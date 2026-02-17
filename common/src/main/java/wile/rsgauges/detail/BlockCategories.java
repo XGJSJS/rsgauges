@@ -58,32 +58,32 @@ public class BlockCategories {
     matchers_.put("plant", (final Level w, final BlockPos p) -> {
       BlockState state = w.getBlockState(p);
       Block b = state.getBlock();
-      return (b instanceof GrowingPlantBlock)|| Auxiliaries.isInBlockTag(state, new ResourceLocation(MODID, "plants"));
+      return (b instanceof GrowingPlantBlock)|| Auxiliaries.isInBlockTag(state, ResourceLocation.fromNamespaceAndPath(MODID, "plants"));
     });
 
-    matchers_.put("material_wood", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "wooden")));
+    matchers_.put("material_wood", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "wooden")));
 
-    matchers_.put("material_stone", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "stone_like")));
+    matchers_.put("material_stone", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "stone_like")));
 
-    matchers_.put("material_glass", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "glass_like")));
+    matchers_.put("material_glass", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "glass_like")));
 
-    matchers_.put("material_clay", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "clay_like")));
+    matchers_.put("material_clay", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "clay_like")));
 
     matchers_.put("material_water", (final Level w, final BlockPos p) -> {
       BlockState st = w.getBlockState(p);
-      if(Auxiliaries.isInBlockTag(st , new ResourceLocation(MODID, "water_like"))) return true;
+      if(Auxiliaries.isInBlockTag(st , ResourceLocation.fromNamespaceAndPath(MODID, "water_like"))) return true;
       if(st.getFluidState().isEmpty()) return false;
       return (st.getFluidState().getType() == Fluids.WATER) || (st.getFluidState().getType() == Fluids.FLOWING_WATER);
     });
 
-    matchers_.put("ore", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "ores")));
+    matchers_.put("ore", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "ores")));
 
-    matchers_.put("woodlog", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "logs")));
+    matchers_.put("woodlog", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "logs")));
 
     matchers_.put("crop", (final Level w, final BlockPos p) -> {
       BlockState state = w.getBlockState(p);
       Block b = state.getBlock();
-      return (b instanceof CropBlock) || Auxiliaries.isInBlockTag(state, new ResourceLocation(MODID, "crops"));
+      return (b instanceof CropBlock) || Auxiliaries.isInBlockTag(state, ResourceLocation.fromNamespaceAndPath(MODID, "crops"));
     });
 
     matchers_.put("crop_mature", (final Level w, final BlockPos p) -> {
@@ -92,9 +92,9 @@ public class BlockCategories {
       return ((b instanceof CropBlock) && ((CropBlock)b).isMaxAge(s)) || (b== Blocks.MELON) || (b==Blocks.PUMPKIN);
     });
 
-    matchers_.put("sapling", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "saplings")));
+    matchers_.put("sapling", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "saplings")));
 
-    matchers_.put("soil", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "soils")));
+    matchers_.put("soil", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "soils")));
 
     matchers_.put("fertile", (final Level w, final BlockPos p) -> {
       boolean fertile = false;
@@ -104,9 +104,9 @@ public class BlockCategories {
       return fertile;
     });
 
-    matchers_.put("planks", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "planks")));
+    matchers_.put("planks", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "planks")));
 
-    matchers_.put("slab", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), new ResourceLocation(MODID, "slabs")));
+    matchers_.put("slab", (final Level w, final BlockPos p) -> Auxiliaries.isInBlockTag(w.getBlockState(p), ResourceLocation.fromNamespaceAndPath(MODID, "slabs")));
 
     // --------------------------------------------------------------------------------
 

@@ -12,6 +12,15 @@
  */
 package wile.rsgauges;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.architectury.registry.registries.RegistrySupplier;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
@@ -23,6 +32,16 @@ import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.ModRegistries;
 
 public class ModContent {
+  public record SwitchLinkRecord(BlockPos pos, String b, long t) {}
+  public static final Codec<SwitchLinkRecord> SWITCH_LINK_CODEC = RecordCodecBuilder.create(instance -> instance.group(BlockPos.CODEC.fieldOf("p").forGetter(SwitchLinkRecord::pos), Codec.STRING.fieldOf("b").forGetter(SwitchLinkRecord::b), Codec.LONG.fieldOf("t").forGetter(SwitchLinkRecord::t)).apply(instance, SwitchLinkRecord::new));
+  public static final StreamCodec<FriendlyByteBuf, SwitchLinkRecord> SWITCH_LINK_STREAM_CODEC = StreamCodec.composite(BlockPos.STREAM_CODEC, SwitchLinkRecord::pos, ByteBufCodecs.STRING_UTF8, SwitchLinkRecord::b, ByteBufCodecs.VAR_LONG, SwitchLinkRecord::t, SwitchLinkRecord::new);
+  public static final RegistrySupplier<DataComponentType<SwitchLinkRecord>> SWITCH_LINK = ModRegistries.COMPONENT_TYPES.register("switch_link", () -> DataComponentType.<SwitchLinkRecord>builder().persistent(SWITCH_LINK_CODEC).networkSynchronized(SWITCH_LINK_STREAM_CODEC).build());
+
+  public record SwitchLinkPearlRecord(long cd_time) {}
+  public static final Codec<SwitchLinkPearlRecord> SWITCH_LINK_PEARL_CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.fieldOf("cd_time").forGetter(SwitchLinkPearlRecord::cd_time)).apply(instance, SwitchLinkPearlRecord::new));
+  public static final StreamCodec<ByteBuf, SwitchLinkPearlRecord> SWITCH_LINK_PEARL_STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_LONG, SwitchLinkPearlRecord::cd_time, SwitchLinkPearlRecord::new);
+  public static final RegistrySupplier<DataComponentType<SwitchLinkPearlRecord>> SWITCH_LINK_PEARL = ModRegistries.COMPONENT_TYPES.register("switch_link_pearl", () -> DataComponentType.<SwitchLinkPearlRecord>builder().persistent(SWITCH_LINK_PEARL_CODEC).networkSynchronized(SWITCH_LINK_PEARL_STREAM_CODEC).build());
+
   private static class detail {
     public static BlockBehaviour.Properties gauge_metallic_block_properties() {
       return BlockBehaviour.Properties.of().strength(0.5f, 15f).sound(SoundType.METAL).noCollission().isValidSpawn((s,w,p,e)->false);

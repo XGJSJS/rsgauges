@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[4,)"
 issueTrackerURL = "https://github.com/XGJSJS/rsgauges/issues/"
 license = "MIT"
 
@@ -7,7 +7,7 @@ license = "MIT"
 modId = "rsgauges"
 version = "${version}"
 displayName = "Gauges and Switches"
-authors = "wilechaote"
+authors = "wilechaote & XG_JS"
 description = '''
 Adds redstone metering gauges, levers, buttons, pressure plates, and all sorts of other sensors and detector switches to the game.
 '''
@@ -15,22 +15,22 @@ logoFile = "logo.png"
 displayURL = "https://github.com/XGJSJS/rsgauges"
 
 [[dependencies.rsgauges]]
-modId = "forge"
-mandatory = true
-versionRange = "[47,)"
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.rsgauges]]
 modId = "minecraft"
-mandatory = true
-versionRange = "[1.20.1,)"
+type = "required"
+versionRange = "[1.21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.rsgauges]]
 modId = "architectury"
-mandatory = true
-versionRange = "[9.0.8,)"
+type = "required"
+versionRange = "[13.0.8,)"
 ordering = "AFTER"
 side = "BOTH"

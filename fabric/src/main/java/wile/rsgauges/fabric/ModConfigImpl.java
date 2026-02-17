@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ModConfigImpl {
     public static CompoundTag configs = new ModConfigs().toNBT();
     private static HashSet<String> optouts_ = new HashSet<>();
-    public static final Set<ResourceLocation> accepted_wrenches = new HashSet<>(List.of(new ResourceLocation("minecraft", "redstone_torch")));
+    public static final Set<ResourceLocation> accepted_wrenches = new HashSet<>(List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "redstone_torch")));
 
     public static void apply() {
         final ArrayList<String> includes = new ArrayList<>();
@@ -81,8 +81,8 @@ public class ModConfigImpl {
                     .map(ResourceLocation::tryParse)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            wrenches.add(new ResourceLocation("minecraft", "redstone_torch"));
-            wrenches.remove(new ResourceLocation("minecraft", "air"));
+            wrenches.add(ResourceLocation.fromNamespaceAndPath("minecraft", "redstone_torch"));
+            wrenches.remove(ResourceLocation.fromNamespaceAndPath("minecraft", "air"));
             accepted_wrenches.clear();
             accepted_wrenches.addAll(wrenches);
         }

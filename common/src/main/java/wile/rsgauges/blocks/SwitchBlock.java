@@ -21,7 +21,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -164,7 +164,6 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   { return ((config & SWITCH_CONFIG_NOT_PASSABLE)==0) ? (Shapes.empty()) : (getShape(state, world, pos, selectionContext)); }
 
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isSignalSource(@NotNull BlockState state)
   { return ((config &SWITCH_CONFIG_LINK_SENDER)==0); }
 
@@ -172,12 +171,10 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   { return (!isWallMount()) && ((side==null) || ((side)==(Direction.UP)) || ((side)==(state.getValue(FACING)))); }
 
   @Override
-  @SuppressWarnings("deprecation")
   public int getSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction side)
   { return getPower(state, world, pos, side, false); }
 
   @Override
-  @SuppressWarnings("deprecation")
   public int getDirectSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction side)
   { return getPower(state, world, pos, side, true); }
 
@@ -205,7 +202,6 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void entityInside(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Entity entity)
   {
     if(world.isClientSide() || ((config & SWITCH_CONFIG_PROJECTILE_SENSE)==0) || (!(entity instanceof Projectile))) return;
@@ -218,36 +214,35 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   }
 
   @Override
-  public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit)
-  {
+  protected @NotNull ItemInteractionResult useItemOn(ItemStack itemStack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
     SwitchTileEntity te = getTe(world, pos);
-    if(te==null) return InteractionResult.FAIL;
-    if(world.isClientSide()) return InteractionResult.SUCCESS;
+    if(te==null) return ItemInteractionResult.FAIL;
+    if(world.isClientSide()) return ItemInteractionResult.SUCCESS;
     te.click_config(null, false); // reset double click tracking
     ClickInteraction ck = ClickInteraction.get(state, world, pos, player, hand, hit);
     if((ck.touch_configured) && te.touch_config(state, player, ck.x, ck.y)) {
       ModResources.BlockSoundEvents.DEFAULT_SWITCH_CONFIGCLICK.play(world, pos);
-      return InteractionResult.CONSUME;
+      return ItemInteractionResult.CONSUME;
     }
     if(ck.wrenched && te.click_config(this, false)) {
       ModResources.BlockSoundEvents.DEFAULT_SWITCH_CONFIGCLICK.play(world, pos);
       Overlay.show(player, te.configStatusTextComponentTranslation((SwitchBlock) state.getBlock()));
-      return InteractionResult.CONSUME;
+      return ItemInteractionResult.CONSUME;
     }
     if(
-      (!ModConfig.without_rightclick_item_switchconfig()) &&
-        (  ((ck.item==Items.REDSTONE) && (((SwitchBlock)state.getBlock()).config & SWITCH_CONFIG_PULSETIME_CONFIGURABLE) != 0)
-          || (ck.item==Items.ENDER_PEARL)
-          || (ck.item == ModRegistries.getItem("switchlink_pearl"))
-        )
+            (!ModConfig.without_rightclick_item_switchconfig()) &&
+                    (  ((ck.item==Items.REDSTONE) && (((SwitchBlock)state.getBlock()).config & SWITCH_CONFIG_PULSETIME_CONFIGURABLE) != 0)
+                            || (ck.item==Items.ENDER_PEARL)
+                            || (ck.item == ModRegistries.getItem("switchlink_pearl"))
+                    )
     ) {
       attack(state, world, pos, player);
-      return InteractionResult.CONSUME;
+      return ItemInteractionResult.CONSUME;
     }
     if ((config & (SWITCH_CONFIG_BISTABLE|SWITCH_CONFIG_PULSE))==0) {
-      return InteractionResult.CONSUME;
+      return ItemInteractionResult.CONSUME;
     } else {
-      return onSwitchActivated(world, pos, state, player, hit.getDirection()) ? InteractionResult.CONSUME : InteractionResult.FAIL;
+      return onSwitchActivated(world, pos, state, player, hit.getDirection()) ? ItemInteractionResult.CONSUME : ItemInteractionResult.FAIL;
     }
   }
 
