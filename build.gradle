@@ -33,6 +33,8 @@ subprojects {
         maven { name = "Jared's maven"; url = "https://maven.blamejared.com/" } // JEI files since January 2023
         maven { name = "ModMaven"; url = "https://modmaven.dev" } // JEI files, fallback
         flatDir { dir 'libs' } // Mod jar dependencies in ./libs
+        maven { url "https://maven.shedaniel.me/" }
+        maven { url "https://maven.terraformersmc.com/releases/" }
     }
 
     loom {

@@ -25,14 +25,14 @@ import java.util.function.BiConsumer;
 
 public class Networking {
   public static void init(String modid) {
-    NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation(modid, "1"), (buf, context) -> PacketTileNotifyClientToServer.Handler.handle(PacketTileNotifyClientToServer.parse(buf), context.getPlayer()));
-    NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation(modid, "3"), (buf, context) -> PacketContainerSyncClientToServer.Handler.handle(PacketContainerSyncClientToServer.parse(buf), context.getPlayer()));
+    NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation(modid, "tile_notify_c2s"), (buf, context) -> PacketTileNotifyClientToServer.Handler.handle(PacketTileNotifyClientToServer.parse(buf), context.getPlayer()));
+    NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation(modid, "container_sync_c2s"), (buf, context) -> PacketContainerSyncClientToServer.Handler.handle(PacketContainerSyncClientToServer.parse(buf), context.getPlayer()));
   }
 
   public static void initClient(String modid) {
-    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "2"), (buf, context) -> PacketTileNotifyServerToClient.Handler.handle(PacketTileNotifyServerToClient.parse(buf)));
-    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "4"), (buf, context) -> PacketContainerSyncServerToClient.Handler.handle(PacketContainerSyncServerToClient.parse(buf)));
-    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "5"), (buf, context) -> OverlayTextMessage.Handler.handle(OverlayTextMessage.parse(buf)));
+    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "tile_notify_s2c"), (buf, context) -> PacketTileNotifyServerToClient.Handler.handle(PacketTileNotifyServerToClient.parse(buf)));
+    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "container_sync_s2c"), (buf, context) -> PacketContainerSyncServerToClient.Handler.handle(PacketContainerSyncServerToClient.parse(buf)));
+    NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation(modid, "overlay_text"), (buf, context) -> OverlayTextMessage.Handler.handle(OverlayTextMessage.parse(buf)));
   }
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ public class Networking {
       if((!(player instanceof ServerPlayer)) || (te==null) || (nbt==null)) return;
       FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
       PacketTileNotifyServerToClient.compose(new PacketTileNotifyServerToClient(te, nbt), buf);
-      NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation(RsGaugesMod.MODID, "5"), buf);
+      NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation(RsGaugesMod.MODID, "tile_notify_s2c"), buf);
     }
 
     public static void sendToPlayers(BlockEntity te, CompoundTag nbt) {
@@ -194,7 +194,7 @@ public class Networking {
       if (!(player instanceof ServerPlayer serverPlayer)) return;
       FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
       OverlayTextMessage.compose(new OverlayTextMessage(message, delay), buf);
-      NetworkManager.sendToPlayer(serverPlayer, new ResourceLocation(RsGaugesMod.MODID, "5"), buf);
+      NetworkManager.sendToPlayer(serverPlayer, new ResourceLocation(RsGaugesMod.MODID, "overlay_text"), buf);
     }
 
     public OverlayTextMessage(final Component tct, int delay) {

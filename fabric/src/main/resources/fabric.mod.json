@@ -21,6 +21,9 @@
     ],
     "client": [
       "wile.rsgauges.fabric.client.RsGaugesFabricClient"
+    ],
+    "modmenu": [
+      "wile.rsgauges.fabric.integration.RsGaugesModMenuIntegration"
     ]
   },
   "depends": {

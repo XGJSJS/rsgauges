@@ -10,12 +10,12 @@ import wile.rsgauges.RsGaugesMod;
 import wile.rsgauges.libmc.detail.ModRegistries;
 import wile.rsgauges.libmc.detail.fabric.OverlayImpl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class RsGaugesFabricClient implements ClientModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
-    private static final List<String> BLOCKS_CUTOUT = new ArrayList<>();
+    private static final Set<String> BLOCKS_CUTOUT = new HashSet<>();
 
     @Override
     public void onInitializeClient() {

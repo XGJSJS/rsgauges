@@ -8,10 +8,11 @@
  */
 package wile.rsgauges.libmc.detail;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -37,6 +37,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Auxiliaries {
+  private static final Pattern pt = Pattern.compile("\\$\\{([^}]+)}");
+
   private static String modid;
   private static Logger logger;
   private static Supplier<CompoundTag> server_config_supplier = CompoundTag::new;
@@ -53,24 +55,6 @@ public class Auxiliaries {
 
   public static Logger logger() {
     return logger;
-  }
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // Sideness, system/environment, tagging interfaces
-  // -------------------------------------------------------------------------------------------------------------------
-
-  @Environment(EnvType.CLIENT)
-  @SuppressWarnings("all")
-  public static boolean isShiftDown() {
-    return (InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT) ||
-      InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT));
-  }
-
-  @Environment(EnvType.CLIENT)
-  @SuppressWarnings("all")
-  public static boolean isCtrlDown() {
-    return (InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL) ||
-      InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_CONTROL));
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -112,7 +96,6 @@ public class Auxiliaries {
     final String ft = tr.getString();
     if(ft.contains("${")) {
       // Non-recursive, non-argument lang file entry cross referencing.
-      Pattern pt = Pattern.compile("\\$\\{([^}]+)}");
       Matcher mt = pt.matcher(ft);
       StringBuilder sb = new StringBuilder();
       while(mt.find()) {
@@ -144,18 +127,20 @@ public class Auxiliaries {
    * Returns true if a given key is translated for the current language.
    */
   @Environment(EnvType.CLIENT)
-  public static boolean hasTranslation(String key)
-  { return net.minecraft.client.resources.language.I18n.exists(key); }
+  public static boolean hasTranslation(String key) {
+    return I18n.exists(key);
+  }
 
-  public static final class Tooltip
-  {
+  public static final class Tooltip {
     @Environment(EnvType.CLIENT)
-    public static boolean extendedTipCondition()
-    { return isShiftDown(); }
+    public static boolean extendedTipCondition() {
+      return Screen.hasShiftDown();
+    }
 
     @Environment(EnvType.CLIENT)
-    public static boolean helpCondition()
-    { return isShiftDown() && isCtrlDown(); }
+    public static boolean helpCondition() {
+      return Screen.hasShiftDown()/* && Screen.hasControlDown()*/;
+    }
 
     /**
      * Adds an extended tooltip or help tooltip depending on the key states of CTRL and SHIFT.
@@ -163,24 +148,29 @@ public class Auxiliaries {
      * no translation found).
      */
     @Environment(EnvType.CLIENT)
-    public static boolean addInformation(@Nullable String advancedTooltipTranslationKey, @Nullable String helpTranslationKey, List<Component> tooltip, boolean addAdvancedTooltipHints)
-    {
+    public static boolean addInformation(@Nullable String advancedTooltipTranslationKey, @Nullable String helpTranslationKey, List<Component> tooltip, boolean addAdvancedTooltipHints) {
       // Note: intentionally not using keybinding here, this must be `control` or `shift`.
       final boolean help_available = (helpTranslationKey != null) && Auxiliaries.hasTranslation(helpTranslationKey + ".help");
       final boolean tip_available = (advancedTooltipTranslationKey != null) && Auxiliaries.hasTranslation(helpTranslationKey + ".tip");
-      if((!help_available) && (!tip_available)) return false;
+      if ((!help_available) && (!tip_available))
+        return false;
       String tip_text = "";
-      if(helpCondition()) {
-        if(help_available) tip_text = localize(helpTranslationKey + ".help");
-      } else if(extendedTipCondition()) {
-        if(tip_available) tip_text = localize(advancedTooltipTranslationKey + ".tip");
-      } else if(addAdvancedTooltipHints) {
-        if(tip_available) tip_text += localize(modid + ".tooltip.hint.extended") + (help_available ? " " : "");
-        if(help_available) tip_text += localize(modid + ".tooltip.hint.help");
+      if (helpCondition()) {
+        if (help_available)
+          tip_text = localize(helpTranslationKey + ".help");
+      } else if (extendedTipCondition()) {
+        if (tip_available)
+          tip_text = localize(advancedTooltipTranslationKey + ".tip");
+      } else if (addAdvancedTooltipHints) {
+        if (tip_available)
+          tip_text += localize(modid + ".tooltip.hint.extended") + (help_available ? " " : "");
+        if (help_available)
+          tip_text += localize(modid + ".tooltip.hint.help");
       }
-      if(tip_text.isEmpty()) return false;
+      if (tip_text.isEmpty())
+        return false;
       String[] tip_list = tip_text.split("\\r?\\n");
-      for(String tip:tip_list) {
+      for (String tip : tip_list) {
         tooltip.add(Component.literal(tip.replaceAll("\\s+$","").replaceAll("^\\s+", "")).withStyle(ChatFormatting.GRAY));
       }
       return true;
