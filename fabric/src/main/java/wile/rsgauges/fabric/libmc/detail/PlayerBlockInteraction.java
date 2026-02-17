@@ -18,7 +18,7 @@ public class PlayerBlockInteraction {
             final BlockPos pos = fromPos.relative(facing);
             final BlockState state = world.getBlockState(pos);
             if (state.getBlock() instanceof INeighbourBlockInteractionSensitive blockInteractionSensitive) {
-                if (blockInteractionSensitive.onNeighborBlockPlayerInteraction(world, pos, state, fromPos, player, InteractionHand.MAIN_HAND, true)) {
+                if (blockInteractionSensitive.onNeighborBlockPlayerInteraction(world, pos, state, fromPos, player, InteractionHand.MAIN_HAND)) {
                     return false;
                 }
             }
