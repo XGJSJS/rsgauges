@@ -5,7 +5,7 @@
   "itemGroup.tabrsgauges": "Jauges et interrupteurs",
   "rsgauges.config.title": "Configuration des jauges et des interrupteurs",
   "rsgauges.tooltip.hint.extended": "§6[§9Maj§r plus§6]§r",
-  "rsgauges.tooltip.hint.help": "§6[§9ctrl-maj§r aide§6]§r",
+  "rsgauges.tooltip.hint.help": "§6[§9ctrlj§r aide§6]§r",
   "block.rsgauges.arrow_target": "Cible de flèche",
   "block.rsgauges.arrow_target.help": "Une cible qui émet une impulsion de redstone\n vers le bloc auquel elle est attachée\n lorsqu'elle est touchée par une flèche\n ou activée à la main.\n ${rsgauges.switch.feature.outputconfig.help}\n ${rsgauges.switch.feature.linksource.help}",
   "block.rsgauges.door_sensor_switch": "Capteur de porte",
@@ -330,5 +330,22 @@
   "rsgauges.switchlinking.switchlink_pearl.use.targetgone": "Le commutateur cible est cassé ou déplacé",
   "rsgauges.switchlinking.switchlink_pearl.use.toofaraway": "Le commutateur cible est trop loin de vous",
   "rsgauges.switchlinking.target_assign.error_notarget": "Ce commutateur ne peut pas être une cible Link",
-  "rsgauges.switchlinking.target_assign.ok": "Commutateur cible mémorisé"
+  "rsgauges.switchlinking.target_assign.ok": "Commutateur cible mémorisé",
+
+  "text.autoconfig.rsgauges.title": "Gauges and Switches Config",
+  "text.autoconfig.rsgauges.option.pattern_excludes": "Opt-out settings",
+  "text.autoconfig.rsgauges.option.pattern_excludes.pattern_excludes": "Pattern excludes",
+  "text.autoconfig.rsgauges.option.pattern_excludes.pattern_includes": "Pattern includes",
+  "text.autoconfig.rsgauges.option.pattern_excludes.without_switch_linking": "Disables switch remote linking",
+  "text.autoconfig.rsgauges.option.miscellaneous": "Miscellaneous settings",
+  "text.autoconfig.rsgauges.option.miscellaneous.with_experimental": "Enables experimental features",
+  "text.autoconfig.rsgauges.option.miscellaneous.max_switch_linking_distance": "Max Switch Linking Distance",
+  "text.autoconfig.rsgauges.option.miscellaneous.accepted_wrenches": "Accepted Wrenches",
+  "text.autoconfig.rsgauges.option.miscellaneous.with_config_logging": "with_config_logging",
+  "text.autoconfig.rsgauges.option.tweaks": "Settings to tweak the performance",
+  "text.autoconfig.rsgauges.option.tweaks.without_gauge_weak_power_measurement": "without_gauge_weak_power_measurement",
+  "text.autoconfig.rsgauges.option.tweaks.gauge_update_interval": "gauge_update_interval",
+  "text.autoconfig.rsgauges.option.tweaks.autoswitch_volumetric_update_interval": "autoswitch_volumetric_update_interval",
+  "text.autoconfig.rsgauges.option.tweaks.autoswitch_linear_update_interval": "autoswitch_linear_update_interval",
+  "text.autoconfig.rsgauges.option.tweaks.comparator_switch_update_interval": "Sample interval of the Comparator Switch"
 }

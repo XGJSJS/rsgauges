@@ -1,0 +1,19 @@
+{
+ "neoforge:conditions": [
+  {
+   "type": "rsgauges:optional",
+   "required": [
+    "rsgauges:switchlink_pearl"
+   ]
+  }
+ ],
+ "type": "minecraft:crafting_shapeless",
+ "ingredients": [
+  {
+   "item": "rsgauges:switchlink_pearl"
+  }
+ ],
+ "result": {
+  "id": "minecraft:ender_pearl"
+ }
+}

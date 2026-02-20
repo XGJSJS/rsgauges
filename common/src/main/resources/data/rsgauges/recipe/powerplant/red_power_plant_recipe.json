@@ -1,0 +1,27 @@
+{
+ "neoforge:conditions": [
+  {
+   "type": "rsgauges:optional",
+   "result": "rsgauges:red_power_plant"
+  }
+ ],
+ "type": "minecraft:crafting_shaped",
+ "pattern": [
+  "SS",
+  "FP"
+ ],
+ "key": {
+  "S": {
+   "item": "minecraft:stick"
+  },
+  "F": {
+   "item": "minecraft:red_tulip"
+  },
+  "P": {
+   "tag": "rsgauges:pressure_plates"
+  }
+ },
+ "result": {
+  "id": "rsgauges:red_power_plant"
+ }
+}

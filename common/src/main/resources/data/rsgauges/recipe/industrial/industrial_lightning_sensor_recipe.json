@@ -1,0 +1,20 @@
+{
+ "neoforge:conditions": [
+  {
+   "type": "rsgauges:optional",
+   "result": "rsgauges:industrial_lightning_sensor",
+   "required": [
+    "rsgauges:industrial_rain_sensor"
+   ]
+  }
+ ],
+ "type": "minecraft:crafting_shapeless",
+ "ingredients": [
+  {
+   "item": "rsgauges:industrial_rain_sensor"
+  }
+ ],
+ "result": {
+  "id": "rsgauges:industrial_lightning_sensor"
+ }
+}

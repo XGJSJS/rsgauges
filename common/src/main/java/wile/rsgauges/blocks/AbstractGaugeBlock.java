@@ -50,7 +50,7 @@ import wile.rsgauges.detail.SwitchLink.LinkMode;
 import wile.rsgauges.detail.SwitchLink.RequestResult;
 import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
-import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.Overlay;
 import wile.rsgauges.libmc.detail.ModRegistries;
 
 import java.util.Optional;

@@ -27,7 +27,7 @@ import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.SwitchLink;
 import wile.rsgauges.detail.SwitchLink.ISwitchLinkable;
 import wile.rsgauges.libmc.detail.Auxiliaries;
-import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.Overlay;
 import wile.rsgauges.libmc.detail.ModRegistries;
 
 import java.util.List;

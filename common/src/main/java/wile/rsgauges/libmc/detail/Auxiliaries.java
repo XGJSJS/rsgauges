@@ -139,7 +139,7 @@ public class Auxiliaries {
 
     @Environment(EnvType.CLIENT)
     public static boolean helpCondition() {
-      return Screen.hasShiftDown()/* && Screen.hasControlDown()*/;
+      return Screen.hasControlDown();
     }
 
     /**

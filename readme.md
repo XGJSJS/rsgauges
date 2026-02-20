@@ -15,5 +15,6 @@ Mod sources for Minecraft version 1.21.1.
 ## Version history
 
     - v4.0.0-a1  [A] Initial port.
+    - v4.0.0-b1  [B] Fix recipes, languages.
 
 ----

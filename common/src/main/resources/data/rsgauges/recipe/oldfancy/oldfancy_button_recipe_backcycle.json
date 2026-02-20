@@ -1,0 +1,20 @@
+{
+ "neoforge:conditions": [
+  {
+   "type": "rsgauges:optional",
+   "result": "rsgauges:oldfancy_button",
+   "required": [
+    "rsgauges:oldfancy_small_button"
+   ]
+  }
+ ],
+ "type": "minecraft:crafting_shapeless",
+ "ingredients": [
+  {
+   "item": "rsgauges:oldfancy_small_button"
+  }
+ ],
+ "result": {
+  "id": "rsgauges:oldfancy_button"
+ }
+}

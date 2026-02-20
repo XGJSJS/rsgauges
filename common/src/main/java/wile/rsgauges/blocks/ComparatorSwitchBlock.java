@@ -29,7 +29,7 @@ import wile.rsgauges.ModConfig;
 import wile.rsgauges.blocks.EnvironmentalSensorSwitchBlock.EnvironmentalSensorSwitchTileEntity;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
-import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.Overlay;
 import wile.rsgauges.libmc.detail.ModRegistries;
 
 import java.util.ArrayList;

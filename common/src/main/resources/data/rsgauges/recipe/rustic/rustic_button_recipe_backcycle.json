@@ -1,0 +1,20 @@
+{
+ "neoforge:conditions": [
+  {
+   "type": "rsgauges:optional",
+   "result": "rsgauges:rustic_button",
+   "required": [
+    "rsgauges:rustic_nail_button"
+   ]
+  }
+ ],
+ "type": "minecraft:crafting_shapeless",
+ "ingredients": [
+  {
+   "item": "rsgauges:rustic_nail_button"
+  }
+ ],
+ "result": {
+  "id": "rsgauges:rustic_button"
+ }
+}

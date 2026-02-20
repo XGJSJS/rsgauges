@@ -6,7 +6,6 @@ import wile.rsgauges.detail.BlockCategories;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.ModRegistries;
 import wile.rsgauges.libmc.detail.Networking;
-import wile.rsgauges.libmc.detail.Overlay;
 
 public final class RsGaugesMod {
     public static final String MODID = "rsgauges";

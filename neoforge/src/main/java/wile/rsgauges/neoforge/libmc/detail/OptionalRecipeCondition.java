@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public record OptionalRecipeCondition(@Nullable ResourceLocation result, List<ResourceLocation> all_required,
@@ -103,8 +104,8 @@ public record OptionalRecipeCondition(@Nullable ResourceLocation result, List<Re
     public static final MapCodec<OptionalRecipeCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.list(Codec.STRING).fieldOf("required").orElse(new ArrayList<>()).forGetter(Serializer::encodeRequired),
             Codec.list(Codec.STRING).fieldOf("missing").orElse(new ArrayList<>()).forGetter(Serializer::encodeMissing),
-            Codec.STRING.fieldOf("result").orElse(null).forGetter(Serializer::encodeResult),
-            Codec.BOOL.fieldOf("experimental").orElse(false).forGetter(Serializer::encodeBoolean)).apply(instance, Serializer::decode));
+            Codec.STRING.optionalFieldOf("result").forGetter(Serializer::encodeResult),
+            Codec.BOOL.fieldOf("experimental").orElse(false).forGetter(Serializer::encodeExperimental)).apply(instance, Serializer::decode));
 
     public static List<String> encodeRequired(OptionalRecipeCondition condition) {
       return condition.all_required.stream().map(ResourceLocation::toString).toList();
@@ -114,22 +115,23 @@ public record OptionalRecipeCondition(@Nullable ResourceLocation result, List<Re
       return condition.any_missing.stream().map(ResourceLocation::toString).toList();
     }
 
-    public static String encodeResult(OptionalRecipeCondition condition) {
-      return (condition.result != null) ? ((condition.result_is_tag ? "#" : "") + condition.result) : null;
+    public static Optional<String> encodeResult(OptionalRecipeCondition condition) {
+      return (condition.result != null) ? Optional.of(((condition.result_is_tag ? "#" : "") + condition.result)) : Optional.empty();
     }
 
-    public static boolean encodeBoolean(OptionalRecipeCondition condition) {
+    public static boolean encodeExperimental(OptionalRecipeCondition condition) {
       return condition.experimental;
     }
 
-    public static OptionalRecipeCondition decode(List<String> requiredString, List<String> missingString, @Nullable String resultString, boolean experimental) {
+    public static OptionalRecipeCondition decode(List<String> requiredString, List<String> missingString, Optional<String> resultStringOptional, boolean experimental) {
       List<ResourceLocation> required = new ArrayList<>();
       List<ResourceLocation> missing = new ArrayList<>();
       List<ResourceLocation> required_tags = new ArrayList<>();
       List<ResourceLocation> missing_tags = new ArrayList<>();
       ResourceLocation result = null;
       boolean result_is_tag = false;
-      if (resultString != null) {
+      if (resultStringOptional.isPresent()) {
+        String resultString = resultStringOptional.get();
         if(resultString.startsWith("#")) {
           result = ResourceLocation.parse(resultString.substring(1));
           result_is_tag = true;

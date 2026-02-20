@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wile.rsgauges.RsGaugesMod;
 import wile.rsgauges.libmc.detail.ModRegistries;
-import wile.rsgauges.libmc.detail.fabric.OverlayImpl;
+import wile.rsgauges.fabric.OverlayImpl;
 
 import java.util.HashSet;
 import java.util.Set;
