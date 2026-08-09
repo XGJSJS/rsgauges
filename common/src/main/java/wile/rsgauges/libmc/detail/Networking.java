@@ -203,7 +203,6 @@ public class Networking {
 
     public static void sendToPlayer(Player player, Component message, int delay) {
       if (!(player instanceof ServerPlayer serverPlayer)) return;
-      RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), serverPlayer.server.registryAccess());
       NetworkManager.sendToPlayer(serverPlayer, new OverlayTextMessage(message, delay));
     }
 

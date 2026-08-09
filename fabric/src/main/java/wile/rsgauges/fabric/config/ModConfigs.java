@@ -23,7 +23,7 @@ public class ModConfigs implements ConfigData {
     static class Miscellaneous {
         boolean with_experimental = false;
         int max_switch_linking_distance = 48;
-        String accepted_wrenches = "minecraft:redstone_torch,immersiveengineering:screwdriver,immersiveengineering:hammer";
+        String accepted_wrenches = "minecraft:redstone_torch,immersiveengineering:screwdriver,immersiveengineering:hammer,#c:tools/wrench";
         boolean with_config_logging = false;
     }
 

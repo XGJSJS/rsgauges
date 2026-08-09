@@ -347,5 +347,21 @@
   "text.autoconfig.rsgauges.option.tweaks.gauge_update_interval": "仪表检测间隔（刻）",
   "text.autoconfig.rsgauges.option.tweaks.autoswitch_volumetric_update_interval": "实体检测自动开关的检测间隔（刻）",
   "text.autoconfig.rsgauges.option.tweaks.autoswitch_linear_update_interval": "线性自动开关检测间隔（刻）",
-  "text.autoconfig.rsgauges.option.tweaks.comparator_switch_update_interval": "比较器开关的检测间隔"
+  "text.autoconfig.rsgauges.option.tweaks.comparator_switch_update_interval": "比较器开关的检测间隔",
+  "rsgauges.config.pattern_excludes": "排除的方块",
+  "rsgauges.configuration.server": "服务端设置",
+  "rsgauges.configuration.optout": "禁用设定",
+  "rsgauges.configuration.tweaks": "用于调整性能的设置",
+  "rsgauges.configuration.miscellaneous": "杂项设定",
+  "rsgauges.config.pattern_includes": "包括的方块",
+  "rsgauges.config.without_switch_linking": "禁用开关远程链接",
+  "rsgauges.config.comparator_switch_update_interval": "比较器开关的检测间隔",
+  "rsgauges.config.autoswitch_volumetric_update_interval": "线性自动开关检测间隔（刻）",
+  "rsgauges.config.without_gauge_weak_power_measurement": "仪表不检测弱信号",
+  "rsgauges.config.with_config_logging": "包含日志",
+  "rsgauges.config.autoswitch_linear_update_interval": "线性自动开关检测间隔（刻）",
+  "rsgauges.config.accepted_wrenches": "接受的扳手",
+  "rsgauges.config.gauge_update_interval": "仪表检测间隔（刻）",
+  "rsgauges.config.with_experimental": "启用实验性功能",
+  "rsgauges.config.max_switch_linking_distance": "最大链接距离"
 }

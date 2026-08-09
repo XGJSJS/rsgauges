@@ -347,5 +347,21 @@
   "text.autoconfig.rsgauges.option.tweaks.gauge_update_interval": "gauge_update_interval",
   "text.autoconfig.rsgauges.option.tweaks.autoswitch_volumetric_update_interval": "autoswitch_volumetric_update_interval",
   "text.autoconfig.rsgauges.option.tweaks.autoswitch_linear_update_interval": "autoswitch_linear_update_interval",
-  "text.autoconfig.rsgauges.option.tweaks.comparator_switch_update_interval": "Sample interval of the Comparator Switch"
+  "text.autoconfig.rsgauges.option.tweaks.comparator_switch_update_interval": "Sample interval of the Comparator Switch",
+  "rsgauges.config.pattern_excludes": "Pattern Excludes",
+  "rsgauges.configuration.server": "Server Config",
+  "rsgauges.configuration.optout": "Opt-out settings",
+  "rsgauges.configuration.tweaks": "Settings to tweak the performance",
+  "rsgauges.configuration.miscellaneous": "Miscellaneous settings",
+  "rsgauges.config.pattern_includes": "Pattern includes",
+  "rsgauges.config.without_switch_linking": "Disables switch remote linking",
+  "rsgauges.config.comparator_switch_update_interval": "Sample interval of the Comparator Switch",
+  "rsgauges.config.autoswitch_volumetric_update_interval": "Autoswitch Volumetric Update Interval",
+  "rsgauges.config.without_gauge_weak_power_measurement": "Without Gauge Weak Power Measurement",
+  "rsgauges.config.with_config_logging": "With config logging",
+  "rsgauges.config.autoswitch_linear_update_interval": "Autoswitch Linear Update Interval",
+  "rsgauges.config.accepted_wrenches": "Accepted Wrenches",
+  "rsgauges.config.gauge_update_interval": "Gauge Update Interval",
+  "rsgauges.config.with_experimental": "Enables experimental features",
+  "rsgauges.config.max_switch_linking_distance": "Max Switch Linking Distance"
 }

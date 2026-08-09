@@ -10,8 +10,10 @@
 package wile.rsgauges.neoforge;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -210,7 +212,7 @@ public class ModConfigImpl {
     final ArrayList<String> includes = new ArrayList<>();
     final ArrayList<String> excludes = new ArrayList<>();
     {
-      String inc = COMMON.pattern_includes.get().toLowerCase().replaceAll(RsGaugesMod.MODID+":", "").replaceAll("[^*_,a-z0-9]", "");
+      String inc = COMMON.pattern_includes.get().toLowerCase().replace(RsGaugesMod.MODID+":", "").replaceAll("[^*_,a-z0-9]", "");
       if (!Objects.equals(COMMON.pattern_includes.get(), inc)) COMMON.pattern_includes.set(inc);
       String[] incl = inc.split(",");
       for(int i=0; i< incl.length; ++i) {
@@ -219,7 +221,7 @@ public class ModConfigImpl {
       }
     }
     {
-      String exc = COMMON.pattern_excludes.get().toLowerCase().replaceAll(RsGaugesMod.MODID+":", "").replaceAll("[^*_,a-z0-9]", "");
+      String exc = COMMON.pattern_excludes.get().toLowerCase().replace(RsGaugesMod.MODID+":", "").replaceAll("[^*_,a-z0-9]", "");
       String[] excl = exc.split(",");
       for(int i=0; i< excl.length; ++i) {
         excl[i] = excl[i].replaceAll("[*]", ".*?");
@@ -278,15 +280,51 @@ public class ModConfigImpl {
     // Wrenches
     {
       String cfg_wrenches = COMMON.accepted_wrenches.get().toLowerCase().replaceAll("[\\s,]"," ").trim();
-      List<ResourceLocation> wrenches = Arrays.stream(cfg_wrenches.split(" "))
-        .filter(e->!e.trim().isEmpty())
-        .map(ResourceLocation::tryParse)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-      wrenches.add(ResourceLocation.fromNamespaceAndPath("minecraft", "redstone_torch"));
-      wrenches.remove(ResourceLocation.fromNamespaceAndPath("minecraft", "air"));
-      accepted_wrenches.clear();
-      accepted_wrenches.addAll(wrenches);
+      if (cfg_wrenches.isEmpty()) {
+        accepted_wrenches.clear();
+        accepted_wrenches.add(ResourceLocation.withDefaultNamespace("redstone_torch"));
+
+      } else {
+        List<ResourceLocation> wrenches = new ArrayList<>();
+        List<String> tagIds = new ArrayList<>();
+        for (String id : cfg_wrenches.split(" ")) {
+          id = id.trim();
+          if (id.isEmpty()) {
+            continue;
+          }
+          if (id.startsWith("#")) {
+            tagIds.add(id);
+          } else {
+            ResourceLocation location = ResourceLocation.tryParse(id);
+            if (location != null) {
+              wrenches.add(location);
+            }
+          }
+        }
+        for (String tag : tagIds) {
+          try {
+            var tagItems = BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(tag)));
+            tagItems.ifPresent(items -> {
+              items.forEach(holder -> {
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(holder.value());
+                wrenches.add(itemId);
+              });
+            });
+          } catch (Exception e) {
+            Auxiliaries.logError("Failed to process wrench tags: " + tag);
+          }
+        }
+
+        ResourceLocation defaultWrench = ResourceLocation.withDefaultNamespace("redstone_torch");
+        if (!wrenches.contains(defaultWrench)) {
+          wrenches.add(defaultWrench);
+        }
+
+        wrenches.remove(ResourceLocation.withDefaultNamespace("air"));
+
+        accepted_wrenches.clear();
+        accepted_wrenches.addAll(wrenches);
+      }
     }
     log("Accepted wrenches: " + accepted_wrenches.stream().map(ResourceLocation::toString).collect(Collectors.joining(",")));
   }

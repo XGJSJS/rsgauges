@@ -16,5 +16,6 @@ Mod sources for Minecraft version 1.21.1.
 
     - v4.0.0-a1  [A] Initial port.
     - v4.0.0-b1  [B] Fix recipes, languages.
+    - v4.0.0-b2  Now wrenchs support tags. Fully support Config GUI.
 
 ----
